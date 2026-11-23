@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arshbir Bhamra · Aerospace Engineering</title>
+<meta name="description" content="Aerospace engineering student at UIUC. Ground Station Lead at Illinois Space Society, avionics structures on a two-stage sounding rocket, founder of HomeTern.">
+<meta property="og:title" content="Arshbir Bhamra · Aerospace Engineering">
+<meta property="og:description" content="From the launch pad to the Kármán line: the hardware I design, integrate and test.">
+<meta name="theme-color" content="#06080c">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2306080c'/%3E%3Cpath d='M16 6 L16 26 M10 26 L22 26' stroke='%237cc4ff' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/sc/scrollcraft.css">
+<style>
+  :root {
+    --sc-canvas:     #06080c;
+    --sc-surface:    #0d1118;
+    --sc-ink:        #eef2f6;
+    --sc-ink-soft:   #9aa6b5;
+    --sc-accent:     #7cc4ff;
+    --sc-accent-ink: #04070b;
+    --sc-font-display: "Archivo", system-ui, sans-serif;
+    --sc-font-text:    "Geist", system-ui, sans-serif;
+    --sc-font-mono:    "Geist Mono", ui-monospace, Consolas, monospace;
+    --line: rgba(156, 190, 225, 0.16);
+    --line-strong: rgba(156, 190, 225, 0.34);
+    --dim: #6c7a8c;
+    --f: 0;            /* altitude fraction 0..1, written by the altimeter */
+  }
+  html { background: var(--sc-canvas); overflow-x: clip; }
+  .pad { overflow: hidden; }
+  body { background: transparent; }
+  a { color: inherit; text-decoration: none; }
+  .mono { font-family: var(--sc-font-mono); }
+  .tag {
+    font-family: var(--sc-font-mono); font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .tag b { color: var(--sc-accent); font-weight: 500; }
+
+  /* ---------------------------------------------------------------- SKY --
+     One continuous world: a fixed sky that darkens from launch-pad dusk to
+     black space as the altimeter climbs. Nothing scrolls the sky itself. */
+  .sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+    background: linear-gradient(to top, #1a2638 0%, #0e1726 34%, #080c15 70%, #06080c 100%); }
+  .sky__glow { position: absolute; inset: 0;
+    background: radial-gradient(120% 55% at 50% 108%, rgba(120, 170, 230, 0.30), transparent 62%);
+    opacity: calc(1 - var(--f) * 2.2); }
+  .sky__space { position: absolute; inset: 0; background: #040509; opacity: calc(var(--f) * 1.35 - 0.25); }
+  .sky__stars { position: absolute; inset: -60px 0 0 0; width: 100%; height: calc(100% + 60px);
+    opacity: calc(0.28 + var(--f) * 0.72); transform: translateY(calc(var(--f) * -60px)); }
+
+  /* ------------------------------------------------------------- TOP BAR -- */
+  .bar { position: fixed; inset: 0 0 auto 0; z-index: 40; display: flex; align-items: center;
+    justify-content: space-between; gap: var(--sc-4); padding: 18px var(--sc-gutter);
+    background: linear-gradient(to bottom, rgba(6, 8, 12, 0.82), rgba(6, 8, 12, 0)); }
+  .bar__mark { font-family: var(--sc-font-display); font-weight: 700; font-stretch: 118%;
+    letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.9rem; white-space: nowrap; }
+  .bar__mark .dot { color: var(--sc-accent); }
+  .bar__mark .short { display: none; }
+  .bar__links { display: flex; align-items: center; gap: var(--sc-6); font-size: 0.92rem; }
+  .bar__links a:not(.btn) { color: var(--sc-ink-soft); transition: color 160ms var(--sc-ease-out); }
+  .bar__links a:not(.btn):hover { color: var(--sc-ink); }
+  .bar__alt { display: none; align-items: center; gap: 6px; font-family: var(--sc-font-mono); font-size: 0.75rem; color: var(--sc-accent);
+    background: rgba(6, 8, 12, 0.6); border: 1px solid var(--line-strong); padding: 8px 10px 8px 12px; min-height: 40px;
+    border-radius: 999px; white-space: nowrap; cursor: pointer; transition: border-color 160ms var(--sc-ease-out); }
+  .bar__alt:hover, .bar__alt[aria-expanded="true"] { border-color: var(--sc-accent); }
+  .bar__alt .ic { transition: rotate 200ms var(--sc-ease-out); }
+  .bar__alt[aria-expanded="true"] .ic { rotate: 180deg; }
+  .wp-sheet { position: fixed; z-index: 45; top: 70px; right: var(--sc-gutter); width: min(19rem, calc(100vw - 2 * var(--sc-gutter)));
+    background: rgba(13, 17, 24, 0.96); border: 1px solid var(--line-strong); border-radius: 12px; padding: 8px;
+    box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.7); }
+  .wp-sheet[hidden] { display: none; }
+  .wp-sheet ol { list-style: none; margin: 0; padding: 0; border-left: 1px solid var(--line-strong); margin-left: 12px; }
+  .wp-sheet a { display: flex; justify-content: space-between; gap: 12px; padding: 11px 12px 11px 16px; position: relative;
+    color: var(--sc-ink-soft); border-radius: 8px; }
+  .wp-sheet a::before { content: ""; position: absolute; left: -4px; top: 50%; width: 7px; height: 7px; translate: 0 -50%;
+    rotate: 45deg; border: 1px solid var(--line-strong); background: var(--sc-surface); }
+  .wp-sheet a span { font-family: var(--sc-font-mono); font-size: 0.72rem; color: var(--dim); padding-top: 2px; }
+  .wp-sheet a:hover { color: var(--sc-ink); background: rgba(124, 196, 255, 0.06); }
+  .wp-sheet li.is-passed a::before { border-color: var(--sc-accent); }
+  .wp-sheet li.is-cur a { color: var(--sc-ink); }
+  .wp-sheet li.is-cur a::before { background: var(--sc-accent); border-color: var(--sc-accent); }
+
+  .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 20px; border-radius: 999px;
+    font-weight: 500; font-size: 0.95rem; white-space: nowrap; border: 1px solid var(--line-strong);
+    transition: background-color 160ms var(--sc-ease-out), border-color 160ms var(--sc-ease-out), transform 120ms var(--sc-ease-out); }
+  .btn:active { transform: translateY(1px); }
+  .btn--solid { background: var(--sc-ink); color: var(--sc-accent-ink); border-color: var(--sc-ink); }
+  .btn--solid:hover { background: #fff; }
+  .btn--ghost:hover { border-color: var(--sc-accent); background: rgba(124, 196, 255, 0.08); }
+
+  /* ----------------------------------------------- ALTIMETER (signature) --
+     A log-scale altimeter from the pad to the 100 km Kármán line. It is the
+     navigation: waypoints are links, passed waypoints stay lit. */
+  .alt { position: fixed; z-index: 30; left: clamp(16px, 2.2vw, 36px); top: 50%; translate: 0 -50%;
+    height: min(62vh, 560px); width: 150px; pointer-events: none; }
+  .alt__track { position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--line-strong); }
+  .alt__fill { position: absolute; left: 0; bottom: 0; width: 1px; height: calc(var(--f) * 100%);
+    background: var(--sc-accent); }
+  .alt__ticks { position: absolute; left: -4px; top: 0; bottom: 0; width: 9px;
+    background: repeating-linear-gradient(to top, var(--line-strong) 0 1px, transparent 1px 12.5%); opacity: 0.7; }
+  .alt__bug { position: absolute; left: -5px; bottom: calc(var(--f) * 100%); translate: 0 50%;
+    width: 11px; height: 11px; border: 1px solid var(--sc-accent); background: var(--sc-canvas); rotate: 45deg; }
+  .alt__read { position: absolute; left: 18px; bottom: calc(var(--f) * 100%); translate: 0 50%;
+    font-family: var(--sc-font-mono); font-size: 0.72rem; color: var(--sc-accent); white-space: nowrap;
+    background: rgba(6, 8, 12, 0.7); padding: 2px 6px; border-radius: 4px; }
+  .alt ol { list-style: none; margin: 0; padding: 0; }
+  .alt li { position: absolute; left: 0; translate: 0 50%; }
+  .alt li a { pointer-events: auto; display: flex; align-items: center; gap: 10px; padding: 4px 0;
+    font-family: var(--sc-font-mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--dim); opacity: 0; transition: opacity 200ms var(--sc-ease-out), color 160ms var(--sc-ease-out); }
+  .alt li a::before { content: ""; width: 7px; height: 1px; background: currentColor; margin-left: -3px; }
+  .alt:hover li a, .alt li.is-cur a, .alt li.is-next a { opacity: 1; }
+  .alt li.is-cur a { color: var(--sc-ink); }
+  .alt li.is-passed a::before { background: var(--sc-accent); }
+  .alt li a:hover, .alt li a:focus-visible { color: var(--sc-ink); opacity: 1; }
+  .alt__cap { position: absolute; left: 0; top: calc(100% + 14px); font-family: var(--sc-font-mono);
+    font-size: 0.6rem; letter-spacing: 0.08em; color: var(--dim); text-transform: uppercase; line-height: 1.5; }
+  @media (max-width: 1180px) {
+    .alt { display: none; }
+    .bar__alt { display: inline-flex; }
+  }
+  @media (min-width: 1181px) { .wp-sheet { display: none; } }
+
+  /* ------------------------------------------------------------- 1 · PAD -- */
+  .pad { position: relative; height: 100%; }
+  .pad__grid { position: absolute; left: -20%; right: -20%; bottom: -10%; height: 62%;
+    background-image:
+      linear-gradient(rgba(124, 196, 255, 0.30) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124, 196, 255, 0.30) 1px, transparent 1px);
+    background-size: 64px 64px; transform: perspective(460px) rotateX(66deg); transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 92%);
+            mask-image: linear-gradient(to top, #000 10%, transparent 92%); }
+  .pad__horizon { position: absolute; left: 0; right: 0; top: 49%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124, 196, 255, 0.5), transparent); }
+  .pad__haze { position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
+    background: linear-gradient(to top, rgba(6, 8, 12, 0.92), rgba(6, 8, 12, 0)); }
+  .pad__copy { position: absolute; z-index: 2; left: var(--sc-gutter); right: var(--sc-gutter);
+    bottom: clamp(2.5rem, 9vh, 6.5rem); padding-left: clamp(0px, 9vw, 150px); }
+  .pad h1 { font-family: var(--sc-font-display); font-weight: 800; font-stretch: 122%; text-transform: uppercase;
+    font-size: clamp(3.1rem, 10.2vw, 10.5rem); line-height: 0.88; letter-spacing: -0.02em; margin: 0 0 var(--sc-6); }
+  .pad__lede { font-size: clamp(1.1rem, 1.7vw, 1.45rem); line-height: 1.45; max-width: 36ch; color: var(--sc-ink);
+    margin: 0 0 var(--sc-6); text-wrap: balance; }
+  .pad__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-3); }
+  .pad__tele { position: absolute; z-index: 2; top: clamp(5.5rem, 15vh, 9rem); right: var(--sc-gutter);
+    text-align: right; display: grid; gap: 6px; }
+  .pad__tele div { font-family: var(--sc-font-mono); font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .pad__tele div b { color: var(--sc-ink); font-weight: 500; }
+  .pad__tele .live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #46e0a0; margin-right: 8px; vertical-align: 1px; }
+
+  /* ---------------------------------------------------------- 2 · ORIGIN -- */
+  .origin { padding-block: clamp(5rem, 14vh, 9rem) clamp(4rem, 10vh, 7rem); }
+  .origin__grid { display: grid; grid-template-columns: 1.15fr 1fr; gap: clamp(2.5rem, 7vw, 7rem); align-items: end; }
+  .origin__say { font-family: var(--sc-font-display); font-weight: 600; font-size: clamp(1.9rem, 3.6vw, 3.4rem);
+    line-height: 1.06; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+  .origin__say em { font-style: normal; color: var(--sc-accent); }
+  .origin__body { margin-top: var(--sc-6); }
+  .log { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .log li { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--sc-4); padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .log .t { font-family: var(--sc-font-mono); font-size: 0.75rem; letter-spacing: 0.1em; color: var(--sc-accent); padding-top: 3px; text-transform: uppercase; }
+  .log p { margin: 0; color: var(--sc-ink-soft); font-size: 0.98rem; }
+  .log p b { color: var(--sc-ink); font-weight: 500; }
+  .origin__grid { grid-template-columns: 1.1fr minmax(11rem, 0.5fr) 1fr; }
+  .origin__side { display: contents; }
+  .origin__photo { margin: 0; }
+  .origin__photo img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; object-position: 50% 30%;
+    border-radius: 10px; box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8); }
+  figcaption { margin-top: 10px; font-size: 0.8rem; color: var(--sc-ink-soft); line-height: 1.45; }
+  @media (max-width: 1100px) {
+    .origin__grid { grid-template-columns: minmax(10rem, 0.6fr) 1fr; }
+    .origin__grid > :first-child { grid-column: 1 / -1; }
+  }
+  @media (max-width: 560px) {
+    .origin__grid { grid-template-columns: 1fr; }
+    .origin__photo { max-width: 16rem; }
+  }
+
+  /* -------------------------------------------------- 3 · GROUND STATION -- */
+  .gs { height: 100%; display: grid; grid-template-columns: minmax(18rem, 0.8fr) 1.2fr; align-items: center;
+    gap: clamp(2rem, 4vw, 4rem); padding: 96px var(--sc-gutter) 48px calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)); }
+  .gs__col { display: flex; flex-direction: column; gap: var(--sc-6); }
+  .gs__own { margin: 0; padding-top: var(--sc-4); border-top: 1px solid var(--line-strong); display: flex; flex-wrap: wrap;
+    gap: 6px 18px; font-size: 0.92rem; color: var(--sc-ink-soft); max-width: 44ch; }
+  .gs__own .live { color: var(--sc-ink); font-weight: 500; }
+  .gs__own .live::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+    background: #46e0a0; margin-right: 8px; vertical-align: 1px; }
+  .ic { width: 1em; height: 1em; display: inline-block; vertical-align: -0.12em; flex: none; }
+  .gs__copy { display: grid; }
+  .gs__copy > * { grid-area: 1 / 1; align-self: center; }
+  .gs h2 { font-family: var(--sc-font-display); font-weight: 700; font-stretch: 110%; font-size: clamp(2rem, 3.8vw, 3.6rem);
+    line-height: 0.98; letter-spacing: -0.02em; margin: var(--sc-3) 0 var(--sc-5); }
+  .gs p { color: var(--sc-ink-soft); margin: 0 0 var(--sc-4); max-width: 44ch; }
+  .gs p b { color: var(--sc-ink); font-weight: 500; }
+  .gs__more { display: inline-flex; gap: 8px; color: var(--sc-accent); font-weight: 500; margin-top: var(--sc-2); }
+  .gs__more:hover { text-decoration: underline; }
+  .gs__fig { position: relative; margin: 0; }
+  .gs__fig svg { width: 100%; height: auto; overflow: visible;
+    opacity: calc(1 - 0.85 * clamp(0, calc((var(--sc-p, 0) - 0.7) / 0.12), 1)); }
+  .gs__photo { position: absolute; left: 0; right: 0; top: 0; aspect-ratio: 680 / 430; margin: 0; border-radius: 12px;
+    overflow: hidden; border: 1px solid var(--line-strong); box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9); }
+  .gs__photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 62%;
+    transform: scale(calc(1.06 - 0.06 * clamp(0, calc((var(--sc-p, 0) - 0.7) / 0.3), 1))); }
+  .gs__photo span { position: absolute; left: 12px; bottom: 12px; font-family: var(--sc-font-mono); font-size: 0.7rem;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--sc-ink); background: rgba(6, 8, 12, 0.78);
+    padding: 5px 9px; border-radius: 6px; }
+  .gs__photo span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    background: #46e0a0; margin-right: 8px; vertical-align: 1px; }
+  @media (prefers-reduced-motion: reduce) {
+    .gs__fig svg { opacity: 1; }
+    .gs__photo { position: relative; margin-top: var(--sc-4); }
+  }
+  .gs__fig figcaption { margin-top: var(--sc-3); font-family: var(--sc-font-mono); font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+  /* scroll draws the schematic: each stroke has its own window on --sc-p */
+  .ln { fill: none; stroke: var(--sc-ink); stroke-width: 1.3; stroke-dasharray: 1; vector-effect: non-scaling-stroke;
+    stroke-dashoffset: clamp(0, calc((var(--b) - var(--sc-p, 0)) / (var(--b) - var(--a))), 1); }
+  .ln--acc { stroke: var(--sc-accent); }
+  .ln--dim { stroke: var(--line-strong); }
+  .ln--frame { stroke-width: 2; }
+  .fade { opacity: clamp(0, calc((var(--sc-p, 0) - var(--a)) / (var(--b) - var(--a))), 1); }
+  .gs svg text { font-family: var(--sc-font-mono); fill: var(--sc-ink-soft); font-size: 11.5px; letter-spacing: 0.04em; }
+  .gs svg text.nm { fill: var(--sc-ink); font-size: 12.5px; }
+  .gs svg text.acc { fill: var(--sc-accent); }
+  .gs svg .fill { fill: rgba(124, 196, 255, 0.05); stroke: none; }
+  @media (max-width: 900px) {
+    .gs { grid-template-columns: 1fr; align-content: center; gap: var(--sc-5); padding: 84px var(--sc-gutter) 24px; }
+    .gs__col { order: 2; gap: var(--sc-4); }
+    .gs__copy { min-height: 13.5rem; align-items: start; }
+    .gs__copy > * { align-self: start; }
+    .gs h2 { font-size: 1.9rem; }
+    .gs svg text { font-size: 15px; } .gs svg text.nm { font-size: 16px; }
+    .gs svg .dimtxt { display: none; }
+  }
+
+  /* --------------------------------------------------------- 4 · T-MINUS -- */
+  .tminus { padding-block: clamp(5rem, 14vh, 9rem) clamp(4rem, 14vh, 8rem); }
+  .tminus__line, .tminus__after { font-family: var(--sc-font-display); font-weight: 500; font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+    line-height: 1.2; letter-spacing: -0.01em; max-width: 26ch; margin: 0; text-wrap: balance; }
+  .tminus__after { margin: clamp(3rem, 10vh, 6rem) 0 0 auto; text-align: right; color: var(--sc-ink-soft); }
+  .strip { display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: clamp(1rem, 2.4vw, 2rem); align-items: start;
+    margin-top: clamp(2.5rem, 7vh, 4.5rem); }
+  .strip figure { margin: 0; }
+  .strip img, .strip video { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 10px;
+    background: var(--sc-surface); box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8); }
+  .strip__a video { aspect-ratio: 9 / 14; }
+  .strip__b { margin-top: clamp(2rem, 8vh, 5rem) !important; }
+  .strip__c { margin-top: clamp(0.5rem, 3vh, 2rem) !important; }
+  @media (max-width: 760px) {
+    .strip { grid-template-columns: 1fr 1fr; }
+    .strip__b { margin-top: 3rem !important; }
+    .strip__c { grid-column: 1 / -1; margin-top: 0 !important; }
+    .strip__c img { aspect-ratio: 4 / 3; object-position: 50% 60%; }
+  }
+
+  /* ------------------------------------------------------- 5 · LUNA 2 PEAK -- */
+  .peak { position: relative; height: 100%; }
+  .peak__media { position: absolute; inset: 0; margin: 0; }
+  .peak__media .slot { position: absolute; inset: 0; border-radius: 0; border: 0; }
+  .peak__media .slot img { transform: scale(calc(1.12 - var(--sc-p, 0) * 0.12)); }
+  /* A column of density under the copy (lead side) plus a floor band; the
+     right of the frame, where the charge fires, stays untouched. */
+  .peak__scrim { position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background:
+      linear-gradient(90deg, rgba(4, 5, 9, 0.88) 0%, rgba(4, 5, 9, 0.7) 34%, rgba(4, 5, 9, 0) 64%),
+      linear-gradient(to top, rgba(4, 5, 9, 0.85) 0%, rgba(4, 5, 9, 0.35) 30%, rgba(4, 5, 9, 0) 55%); }
+  @media (max-width: 760px) {
+    .peak__scrim { background: linear-gradient(to top, rgba(4, 5, 9, 0.94) 0%, rgba(4, 5, 9, 0.75) 45%, rgba(4, 5, 9, 0.1) 75%); }
+  }
+  .peak__label { position: absolute; z-index: 2; top: 96px; left: calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)); }
+  .peak__copy { position: absolute; z-index: 2; left: calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)); right: var(--sc-gutter);
+    bottom: clamp(2.5rem, 8vh, 5.5rem); display: grid; }
+  .peak__copy > * { grid-area: 1 / 1; align-self: end; }
+  .peak__num { font-family: var(--sc-font-display); font-weight: 800; font-stretch: 118%; line-height: 0.86;
+    font-size: clamp(3.6rem, 12vw, 11rem); letter-spacing: -0.03em; margin: 0; display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 0.18em; }
+  .peak__num small { font-size: 0.32em; font-weight: 600; letter-spacing: 0; color: var(--sc-ink-soft); font-stretch: 100%; }
+  .peak__sub { margin: var(--sc-4) 0 0; color: var(--sc-ink-soft); max-width: 52ch; }
+  .peak__sub b { color: var(--sc-ink); font-weight: 500; }
+  .peak__label { margin: 0; font-weight: 400; }
+  .peak__lead { font-family: var(--sc-font-display); font-weight: 600; font-size: clamp(1.6rem, 3vw, 2.6rem); line-height: 1.1;
+    letter-spacing: -0.015em; max-width: 22ch; margin: 0; text-wrap: balance; }
+  .no-media .peak__media, .no-media .peak__scrim { display: none; }
+  .no-media .peak__num { font-size: clamp(4.2rem, 15vw, 13rem); }
+  .no-media .peak__copy { bottom: clamp(4rem, 20vh, 12rem); }
+  .peak__role { color: var(--sc-ink-soft); margin: 0 0 var(--sc-4); }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+  .peak__mine { max-width: 60ch; padding: clamp(1.25rem, 2.4vw, 2rem); border-radius: 14px;
+    background: rgba(6, 8, 12, 0.78); border: 1px solid var(--line); box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .peak__mine h3 { font-family: var(--sc-font-display); font-weight: 700; font-size: clamp(1.7rem, 3.2vw, 2.8rem);
+    line-height: 1.02; letter-spacing: -0.02em; margin: 0 0 var(--sc-4); }
+  .peak__mine ul { list-style: none; margin: 0 0 var(--sc-5); padding: 0; display: grid; gap: 8px; }
+  .peak__mine li { color: var(--sc-ink-soft); padding-left: 22px; position: relative; }
+  .peak__mine li::before { content: ""; position: absolute; left: 0; top: 0.78em; width: 12px; height: 1px; background: var(--sc-accent); }
+
+  /* ---------------------------------------------- 6 · BEYOND THE PAD (pan) -- */
+  .beyond { height: 100%; display: flex; align-items: center; padding-top: 64px; }
+  .rail { gap: clamp(1.25rem, 2.4vw, 2.25rem); padding-inline: calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)) var(--sc-gutter); align-items: stretch; }
+  .rail > * { flex: 0 0 clamp(16.5rem, 24vw, 22rem); }
+  .rail__lead { display: flex; flex-direction: column; justify-content: center; }
+  .rail__lead h2 { font-family: var(--sc-font-display); font-weight: 700; font-stretch: 112%;
+    font-size: clamp(2.2rem, 4vw, 3.8rem); line-height: 0.96; letter-spacing: -0.02em; margin: 0 0 var(--sc-4); }
+  .rail__lead p { color: var(--sc-ink-soft); margin: 0; max-width: 30ch; }
+  .obj { display: flex; flex-direction: column; gap: var(--sc-4); }
+  /* Objects without a photo keep the image band as quiet space, so every
+     label schema starts on the same line across the rail. */
+  .rail:has(.obj .slot) .obj:not(:has(.slot))::before { content: ""; display: block; aspect-ratio: 4 / 3;
+    border-top: 1px solid var(--line); }
+  .obj .slot { aspect-ratio: 4 / 3; }
+  .obj .slot img { object-position: 50% 28%; }
+  @media (max-height: 760px) { .obj .slot { aspect-ratio: 16 / 9; } }
+  .obj h3 { font-family: var(--sc-font-display); font-weight: 700; font-size: 1.5rem; letter-spacing: -0.01em; margin: 0; }
+  .obj dl { margin: 0; display: grid; gap: 4px; }
+  .obj dl div { display: grid; grid-template-columns: 4.2rem 1fr; gap: 10px; font-size: 0.9rem; }
+  .obj dt { font-family: var(--sc-font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); padding-top: 3px; }
+  .obj dd { margin: 0; color: var(--sc-ink-soft); }
+  .obj a.more { color: var(--sc-accent); font-size: 0.9rem; font-weight: 500; }
+  .obj a.more:hover { text-decoration: underline; }
+  .rail__note { display: flex; align-items: center; }
+  .rail__note p { font-size: 0.95rem; color: var(--dim); border-left: 1px solid var(--line-strong); padding-left: var(--sc-4); margin: 0; max-width: 24ch; }
+  @media (prefers-reduced-motion: no-preference) {
+    .rail > .obj { opacity: clamp(0.55, calc(var(--sc-p, 0) * 6 - var(--i) * 0.9 + 0.6), 1); }
+  }
+
+  /* ------------------------------------------------------ 7 · SPEC SHEET -- */
+  .spec { padding-block: clamp(4rem, 12vh, 8rem); }
+  .spec__grid { display: grid; grid-template-columns: 0.7fr 1.3fr; gap: clamp(2rem, 6vw, 6rem); }
+  .spec h2 { font-family: var(--sc-font-display); font-weight: 700; font-stretch: 112%; font-size: clamp(2.2rem, 4vw, 3.6rem);
+    line-height: 0.96; letter-spacing: -0.02em; margin: 0 0 var(--sc-4); }
+  .spec__intro p { color: var(--sc-ink-soft); max-width: 34ch; margin: 0 0 var(--sc-5); }
+  .sheet { width: 100%; border-collapse: collapse; }
+  .sheet th, .sheet td { text-align: left; vertical-align: top; padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .sheet tr:first-child th, .sheet tr:first-child td { border-top: 1px solid var(--line); }
+  .sheet th { width: 34%; padding-right: var(--sc-5); font-family: var(--sc-font-mono); font-weight: 400; font-size: 0.72rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-accent); padding-top: 19px; }
+  .sheet td { color: var(--sc-ink-soft); font-size: 0.97rem; line-height: 1.7; }
+  .sheet td .sep { color: var(--dim); margin: 0 0.45em; }
+  .sheet td b { color: var(--sc-ink); font-weight: 500; }
+  @media (max-width: 860px) {
+    .spec__grid { grid-template-columns: minmax(0, 1fr); }
+    .sheet, .sheet tbody, .sheet tr { display: block; width: 100%; }
+    .sheet th { display: block; width: auto; padding-bottom: 4px; border-bottom: 0; }
+    .sheet td { display: block; padding-top: 0; }
+    .sheet tr:first-child td { border-top: 0; }
+  }
+
+  /* ------------------------------------------------- 8 · KÁRMÁN LINE CLOSE -- */
+  .close { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center;
+    padding: 96px var(--sc-gutter) 0 calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)); }
+  .karman { position: relative; height: 1px; margin: 0 0 clamp(2rem, 7vh, 4rem); max-width: 1100px;
+    background: linear-gradient(90deg, transparent, var(--sc-accent) 18%, var(--sc-accent) 82%, transparent); opacity: 0.55; }
+  .karman span { position: absolute; left: 0; top: 12px; }
+  .close h2 { font-family: var(--sc-font-display); font-weight: 800; font-stretch: 118%; text-transform: uppercase;
+    font-size: clamp(2.4rem, 6.6vw, 6.4rem); line-height: 0.92; letter-spacing: -0.02em; margin: 0 0 var(--sc-5); max-width: 14ch; }
+  .close__lede { color: var(--sc-ink-soft); max-width: 50ch; margin: 0 0 var(--sc-7); font-size: 1.05rem; }
+  .close__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-3) var(--sc-5); }
+  .close__links { display: flex; flex-wrap: wrap; gap: var(--sc-5); font-size: 0.95rem; }
+  .close__links a { color: var(--sc-ink-soft); text-decoration: underline; text-decoration-color: var(--line-strong); }
+  .close__links a:hover { color: var(--sc-ink); text-decoration-color: var(--sc-accent); }
+  .close__links .todo { color: var(--dim); font-style: italic; }
+  .foot { margin-top: auto; padding: var(--sc-6) 0 var(--sc-5); display: flex; justify-content: space-between; gap: var(--sc-4);
+    flex-wrap: wrap; font-size: 0.8rem; color: var(--dim); border-top: 1px solid var(--line); }
+
+  /* ------------------------------------------------------- MEDIA SLOTS --
+     Drop a file at the slot's data-src and it appears. Until then a labelled
+     placeholder says exactly which photo belongs there. */
+  .slot { position: relative; overflow: hidden; border-radius: 10px; border: 1px solid var(--line); background: rgba(13, 17, 24, 0.7); }
+  .slot img, .slot video { width: 100%; height: 100%; object-fit: cover; }
+  .slot.is-empty { display: grid; place-items: center; text-align: center;
+    background: repeating-linear-gradient(135deg, transparent 0 14px, rgba(156, 190, 225, 0.035) 14px 15px), rgba(13, 17, 24, 0.75); }
+  .slot .ph { padding: 18px; max-width: 30ch; }
+  .slot .ph b { display: block; font-family: var(--sc-font-mono); font-weight: 500; font-size: 0.66rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--sc-accent); margin-bottom: 6px; }
+  .slot .ph span { font-size: 0.85rem; color: var(--sc-ink-soft); }
+  .slot .ph i { display: block; font-style: normal; font-family: var(--sc-font-mono); font-size: 0.66rem; color: var(--dim); margin-top: 6px; }
+
+  @media (max-width: 700px) {
+    .bar__links .hide-sm { display: none; }
+    .bar__mark .full { display: none; }
+    .bar__mark .short { display: inline; }
+    .bar .btn { padding: 10px 14px; }
+    .bar__links { gap: var(--sc-3); }
+    .pad__tele { display: none; }
+    .pad__copy, .peak__copy, .peak__label, .close { padding-left: 0; }
+    .peak__label { left: var(--sc-gutter); }
+    .close { padding-left: var(--sc-gutter); }
+    .rail { padding-left: var(--sc-gutter); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ln { stroke-dashoffset: 0; } .fade { opacity: 1; }
+    .sky__stars { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<div class="sky" aria-hidden="true">
+  <div class="sky__glow"></div>
+  <div class="sky__space"></div>
+  <canvas class="sky__stars"></canvas>
+</div>
+
+<header class="bar">
+  <a href="#pad" class="bar__mark" aria-label="Arshbir Bhamra, back to top"><span class="full">A. Bhamra</span><span class="short">AB</span><span class="dot">.</span></a>
+  <nav class="bar__links" aria-label="Primary">
+    <button type="button" class="bar__alt" aria-expanded="false" aria-controls="wp-sheet" aria-label="Sections">
+      ALT <span data-alt-read>0 m</span>
+      <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+    </button>
+    <a href="#ground-station">Work</a>
+
+    <a href="mailto:arshbirbhamra@gmail.com" class="btn btn--ghost">Email me</a>
+  </nav>
+</header>
+
+<!-- Waypoint sheet: the altimeter's section list for tablet and phone. -->
+<div class="wp-sheet" id="wp-sheet" hidden>
+  <ol>
+    <li data-wp="karman"><a href="#karman">Kármán line<span>100 km</span></a></li>
+    <li data-wp="spec"><a href="#spec">Spec sheet</a></li>
+    <li data-wp="beyond"><a href="#beyond">Beyond the pad</a></li>
+    <li data-wp="luna"><a href="#luna">Luna apogee<span>13 to 14k ft</span></a></li>
+    <li data-wp="ground-station"><a href="#ground-station">Ground station</a></li>
+    <li data-wp="origin"><a href="#origin">Origin</a></li>
+    <li data-wp="pad"><a href="#pad">Pad</a></li>
+  </ol>
+</div>
+
+<!-- Signature: the altimeter. Log scale, pad to 100 km. It is the nav. -->
+<nav class="alt" aria-label="Altitude and sections">
+  <div class="alt__track"></div>
+  <div class="alt__ticks"></div>
+  <div class="alt__fill"></div>
+  <div class="alt__bug"></div>
+  <div class="alt__read"><span data-alt-read>0 m</span></div>
+  <ol>
+    <li data-wp="pad"><a href="#pad">Pad</a></li>
+    <li data-wp="origin"><a href="#origin">Origin</a></li>
+    <li data-wp="ground-station"><a href="#ground-station">Ground station</a></li>
+    <li data-wp="luna"><a href="#luna">Luna apogee</a></li>
+    <li data-wp="beyond"><a href="#beyond">Beyond the pad</a></li>
+    <li data-wp="spec"><a href="#spec">Spec sheet</a></li>
+    <li data-wp="karman"><a href="#karman">Kármán line</a></li>
+  </ol>
+  <div class="alt__cap">Log scale<br>to the program's<br>100 km goal</div>
+</nav>
+
+<main id="top">
+
+  <!-- 1 · PAD: pinned hero, three planes (stars, launch-field grid, haze) -->
+  <section id="pad" data-sc-act="pin" data-sc-span="1.45" data-alt="0">
+    <div data-sc-stage>
+      <div class="pad">
+        <div data-sc-parallax="-0.9" style="position:absolute;inset:0"><div class="pad__horizon"></div></div>
+        <div data-sc-parallax="-0.4" style="position:absolute;inset:0"><div class="pad__grid"></div></div>
+        <div data-sc-parallax="0.7" style="position:absolute;inset:0"><div class="pad__haze"></div></div>
+
+        <div class="pad__tele" data-sc-cue="0 0.7 0">
+          <div class="live"><b>Ground Station Lead</b> · Illinois Space Society</div>
+          <div><b>Founder</b> · HomeTern</div>
+          <div>UIUC Aerospace · Class of <b>2029</b></div>
+        </div>
+
+        <div class="pad__copy" data-sc-cue="0 0.82 0">
+          <h1 data-sc-kinetic="lines">Arshbir <br>Bhamra</h1>
+          <p class="pad__lede">I build, integrate and test flight hardware. Right now I lead the ground station that talks to our two-stage rocket.</p>
+          <div class="pad__row">
+            <a href="#ground-station" class="btn btn--solid">See the work</a>
+            <a href="mailto:arshbirbhamra@gmail.com" class="btn btn--ghost">Email me</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · ORIGIN: flow, mission log -->
+  <section id="origin" class="origin" data-alt="300">
+    <div class="sc-wrap">
+      <div class="origin__grid">
+        <div data-sc-in>
+          <h2 class="origin__say">My favourite part of engineering is the moment a design turns into <em>something that works</em>, and then finding what breaks.</h2>
+          <p class="sc-body origin__body">I'm an aerospace engineering student at the University of Illinois Urbana-Champaign. I want to work where engineers own hardware from CAD through integration and test: vehicle integration, avionics, ground support equipment, spacecraft hardware.</p>
+        </div>
+        <div class="origin__side">
+        <figure class="origin__photo" data-sc-in>
+          <img src="assets/img/home/arshbir-launch-field.jpg" width="1125" height="1500" alt="Arshbir at the launch field, holding an avionics sled">
+          <figcaption>At the launch field with an avionics sled.</figcaption>
+        </figure>
+        <ol class="log" data-sc-in data-sc-stagger="70">
+          <li><span class="t">Age ~7</span><p>A visit to a <b>Boeing 747 cockpit</b> on a Frankfurt to Calgary flight. That was it.</p></li>
+          <li><span class="t">~6 years</span><p><b>Royal Canadian Air Cadets</b>, Calgary. Ground school, navigation, familiarization flying. Reached Warrant Officer Second Class.</p></li>
+          <li><span class="t">Sep 2025</span><p>Joined <b>Illinois Space Society, Spaceshot</b>. Avionics structures on a two-stage sounding rocket.</p></li>
+          <li><span class="t">Sep 2026</span><p>Took over the <b>ground station</b>. Founded <b>HomeTern</b> that summer.</p></li>
+        </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · GROUND STATION: pinned, the schematic draws itself from scroll -->
+  <section id="ground-station" data-sc-act="pin" data-sc-span="3.1" data-alt="1000">
+    <div data-sc-stage>
+      <div class="gs">
+        <div class="gs__col">
+        <div class="gs__copy">
+          <div data-sc-cue="0 0.34 0">
+            <h2>Ground Station 2.0</h2>
+            <p>The ground station is the team's only live link to the rocket in flight. It has to receive telemetry from <b>two stages on two independent radio channels</b>, then survive a truck ride and a field.</p>
+          </div>
+          <div data-sc-cue="0.30 0.66">
+            <h2>I lead the redesign.</h2>
+            <p>I run the student team and own the mechanical side: CAD in Siemens NX, mounts, internal layout, harness routing, prototyping and bench tests. I also coordinate interfaces with the Avionics, Electrical, GNC and Software teams.</p>
+          </div>
+          <div data-sc-cue="0.6 1 0.08 0.06">
+            <h2>Built for the field.</h2>
+            <p>Aluminum T-slot frame, acrylic panels, 3D-printed mounts. Power hardware you can reach. Airflow across the computer. Clearance for the antennas. A composite redesign targets <b>20%+ less mass</b>.</p>
+            <p>In progress. Not yet fully built or flight-validated.</p>
+            <a class="gs__more" href="projects/ground-station.html">Read the case study <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
+          </div>
+        </div>
+        <!-- Persistent for the whole act: the ownership claim can't be scrolled past. -->
+        <p class="gs__own"><span class="live">Ground Station Lead</span><span>Leading the redesign</span><span>Sep 2026 to now</span></p>
+        </div>
+
+        <figure class="gs__fig">
+          <svg viewBox="0 0 680 430" role="img" aria-labelledby="gs-t gs-d">
+            <title id="gs-t">Ground station packaging study</title>
+            <desc id="gs-d">Top view of the enclosure with the router, computer, power unit and keyboard drawn to scale from their real dimensions, a harness trunk, two cooling fans and router antennas.</desc>
+            <!-- frame -->
+            <rect class="ln ln--frame" style="--a:0;--b:0.2" pathLength="1" x="45" y="80" width="590" height="304" rx="4"/>
+            <rect class="ln ln--dim" style="--a:0.04;--b:0.22" pathLength="1" x="53" y="88" width="574" height="288" rx="2"/>
+            <!-- components, to scale at 22 px per inch -->
+            <rect class="fill fade" style="--a:0.2;--b:0.34" x="62.6" y="97.6" width="225.5" height="110"/>
+            <rect class="ln" style="--a:0.14;--b:0.3" pathLength="1" x="62.6" y="97.6" width="225.5" height="110" rx="3"/>
+            <rect class="fill fade" style="--a:0.24;--b:0.38" x="304.6" y="97.6" width="110" height="110"/>
+            <rect class="ln" style="--a:0.18;--b:0.34" pathLength="1" x="304.6" y="97.6" width="110" height="110" rx="3"/>
+            <rect class="fill fade" style="--a:0.28;--b:0.42" x="430" y="97.6" width="187" height="139.7"/>
+            <rect class="ln" style="--a:0.22;--b:0.38" pathLength="1" x="430" y="97.6" width="187" height="139.7" rx="3"/>
+            <rect class="fill fade" style="--a:0.32;--b:0.46" x="166" y="247.2" width="346.5" height="118.3"/>
+            <rect class="ln" style="--a:0.26;--b:0.42" pathLength="1" x="166" y="247.2" width="346.5" height="118.3" rx="3"/>
+            <!-- labels -->
+            <g class="fade" style="--a:0.3;--b:0.44">
+              <text class="nm" x="76" y="124">Router</text>
+              <text class="dimtxt" x="76" y="142">10.25 × 5 × 1.25 in</text>
+              <text class="nm" x="318" y="124">Computer</text>
+              <text class="dimtxt" x="318" y="142">5 × 5 × 1.5</text>
+              <text class="nm" x="444" y="124">Power unit</text>
+              <text class="dimtxt" x="444" y="142">8.5 × 6.35 × 1.75</text>
+              <text class="nm" x="180" y="274">Keyboard</text>
+              <text class="dimtxt" x="180" y="292">15.75 × 5.375 × 1</text>
+            </g>
+            <!-- harness trunk and drops -->
+            <path class="ln ln--acc" style="--a:0.42;--b:0.6" pathLength="1" d="M440 237.3 V229 H120 V207.6"/>
+            <path class="ln ln--acc" style="--a:0.48;--b:0.6" pathLength="1" d="M360 229 V207.6"/>
+            <path class="ln ln--acc" style="--a:0.5;--b:0.62" pathLength="1" d="M300 229 V247.2"/>
+            <path class="ln ln--acc" style="--a:0.52;--b:0.64" pathLength="1" d="M100 229 V258"/>
+            <path class="ln ln--acc" style="--a:0.46;--b:0.58" pathLength="1" d="M430 160 H414.6"/>
+            <!-- antennas, ~2 in above the router -->
+            <path class="ln" style="--a:0.58;--b:0.7" pathLength="1" d="M122 97.6 V53.6"/>
+            <path class="ln" style="--a:0.6;--b:0.72" pathLength="1" d="M228 97.6 V53.6"/>
+            <circle class="ln" style="--a:0.62;--b:0.72" pathLength="1" cx="122" cy="51" r="3"/>
+            <circle class="ln" style="--a:0.64;--b:0.74" pathLength="1" cx="228" cy="51" r="3"/>
+            <!-- fans + airflow -->
+            <circle class="ln" style="--a:0.58;--b:0.7" pathLength="1" cx="100" cy="282" r="22"/>
+            <circle class="ln" style="--a:0.6;--b:0.72" pathLength="1" cx="100" cy="340" r="22"/>
+            <path class="ln ln--dim" style="--a:0.64;--b:0.76" pathLength="1" d="M128 282 H156 M150 277 L156 282 L150 287"/>
+            <path class="ln ln--dim" style="--a:0.66;--b:0.78" pathLength="1" d="M128 340 H156 M150 335 L156 340 L150 345"/>
+            <!-- callouts -->
+            <g class="fade" style="--a:0.7;--b:0.82">
+              <path class="ln ln--dim" style="--a:0.68;--b:0.8" pathLength="1" d="M228 60 H300"/>
+              <text class="acc" x="306" y="64">Antenna clearance ≈ 2 in</text>
+              <path class="ln ln--dim" style="--a:0.7;--b:0.82" pathLength="1" d="M560 229 H600 V408"/>
+              <text class="acc" x="430" y="420">Accessible power distribution</text>
+              <text class="acc" x="200" y="408">Harness trunk</text>
+              <path class="ln ln--dim" style="--a:0.72;--b:0.84" pathLength="1" d="M200 396 V229"/>
+              <text class="acc" x="45" y="408">Airflow</text>
+            </g>
+          </svg>
+          <!-- Payoff: the drawing hands over to the real build at the end of the act. -->
+          <div class="gs__photo fade" style="--a:0.7;--b:0.82">
+            <img src="assets/img/home/gs-build.jpg" width="2000" height="1500" alt="The ground station in progress: a hard case with two monitors in the lid and the router, mini PC and power unit held by printed mounts between T-slot posts">
+            <span>The real build, in progress</span>
+          </div>
+          <figcaption>Packaging study · component envelopes to scale, arrangement illustrative</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · T-MINUS: the hands-on proof, then a held breath before the peak -->
+  <section class="tminus" data-alt="2500">
+    <div class="sc-wrap">
+      <p class="tminus__line" data-sc-in>Before the ground station, I worked on the electronics that fly.</p>
+      <div class="strip" data-sc-in data-sc-stagger="80">
+        <figure class="strip__a">
+          <video class="loop" src="assets/media/sled-power.mp4" poster="assets/media/sled-power-poster.jpg" muted loop playsinline preload="none" aria-label="Powering up the MIDAS flight computer on an avionics sled"></video>
+          <figcaption>Powering up a MIDAS flight computer on its sled.</figcaption>
+        </figure>
+        <figure class="strip__b">
+          <img src="assets/img/home/avionics-sleds.jpg" width="1500" height="2000" loading="lazy" alt="Two Luna avionics sleds with flight computers, antennas and recovery hardware">
+          <figcaption>Two avionics sleds, wired and labelled.</figcaption>
+        </figure>
+        <figure class="strip__c">
+          <img src="assets/img/home/field-integration.jpg" width="1331" height="2000" loading="lazy" alt="Team members wiring avionics at a folding table at the launch field">
+          <figcaption>Final integration at the launch field.</figcaption>
+        </figure>
+      </div>
+      <p class="tminus__after" data-sc-in>Here's how high they went.</p>
+    </div>
+  </section>
+
+  <!-- 5 · LUNA · THE PEAK: scroll fires the ejection charge, then the real altitude -->
+  <section id="luna" data-sc-act="scrub" data-sc-span="3.9" data-sc-dwell="0.3" data-alt="4115">
+    <div data-sc-stage>
+      <div class="peak">
+        <img class="sc-stage__poster" src="assets/media/ejection-poster.jpg" alt="">
+        <video data-sc-scrub data-sc-src="assets/media/ejection-scrub.mp4" data-sc-src-mobile="assets/media/ejection-scrub-m.mp4" muted playsinline aria-label="Ground test of the apogee ejection charge: the charge fires and the nose cone separates"></video>
+        <div class="peak__scrim" aria-hidden="true"></div>
+
+        <h2 class="peak__label tag" data-sc-cue="0 0.96 0"><b>Luna</b> · Illinois Space Society · Spaceshot</h2>
+
+        <div class="peak__copy">
+          <div class="peak__ej" data-sc-cue="0 0.3 0">
+            <p class="peak__lead">At apogee, a charge has to fire and split the rocket so the parachute can come out.</p>
+            <p class="peak__sub">Ground test of the ejection charge. Scroll to fire it.</p>
+          </div>
+          <div data-sc-cue="0.3 0.64">
+            <p class="peak__num"><span class="sr-only">13,000 to 14,000 feet</span><span aria-hidden="true" data-sc-count="0 13,000" data-sc-count-at="0.32 0.56">0</span><small aria-hidden="true">to 14,000 ft</small></p>
+            <p class="peak__sub">Approximate apogee of <b>Luna</b>, our two-stage student sounding rocket. A <b>team</b> result.</p>
+          </div>
+          <div class="peak__mine" data-sc-cue="0.6 1">
+            <h3>The electronics had to survive it.</h3>
+            <p class="peak__role">My part, as Avionics Structures Engineer, Sep 2025 to May 2026:</p>
+            <ul>
+              <li>Structural integration and packaging of flight electronics: TeleMega and MIDAS flight computers, GPS, barometric sensors, LiPo power, pyro deployment interfaces.</li>
+              <li>Booster and sustainer avionics integration during Luna launch operations.</li>
+              <li>Continuity and ejection-system tests, like the ground test above.</li>
+              <li>Troubleshot and rebuilt hardware in about three days for another launch attempt.</li>
+            </ul>
+            <a class="btn btn--ghost" href="projects/sounding-rocket.html">Read the case study</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · BEYOND THE PAD: lateral rail, labels not pitch -->
+  <section id="beyond" data-sc-act="pan" data-sc-span="2.7" data-alt="12000">
+    <div data-sc-stage>
+      <div class="beyond">
+        <div class="rail" data-sc-pan="0.04">
+          <div class="rail__lead">
+            <h2>Beyond the pad.</h2>
+            <p>Software I taught myself, competition builds, and the years that started it.</p>
+          </div>
+
+          <article class="obj" style="--i:1">
+            <div class="slot" data-src="assets/img/home/hometern.jpg" data-label="HomeTern app screens"></div>
+            <h3>HomeTern</h3>
+            <dl>
+              <div><dt>Role</dt><dd>Founder</dd></div>
+              <div><dt>When</dt><dd>Jun 2026 to now</dd></div>
+              <div><dt>Built</dt><dd>Student ridesharing app. React Native, Node/Express, Postgres on Supabase, Stripe Connect, ID verification.</dd></div>
+              <div><dt>Status</dt><dd>In development, early testing</dd></div>
+            </dl>
+            <a class="more" href="projects/hometern.html">Case study <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></a>
+          </article>
+
+          <article class="obj" style="--i:2">
+            <div class="slot" data-src="assets/img/home/apega.jpg" data-label="APEGA competition build" data-alt-text="Arshbir holding a gold ribbon, certificate and trophy from APEGA Science Olympics 2025"></div>
+            <h3>APEGA</h3>
+            <dl>
+              <div><dt>Role</dt><dd>Team Leader</dd></div>
+              <div><dt>When</dt><dd>2023 to 2025</dd></div>
+              <div><dt>Did</dt><dd>Gold 2025: autonomous buried-magnet detector, as team lead. Silver 2024: unpowered hydraulic crane. Silver 2023: powerline structure.</dd></div>
+            </dl>
+          </article>
+
+          <article class="obj" style="--i:3">
+            <div class="slot" data-src="assets/img/home/cadets.jpg" data-label="Air Cadets photo" data-alt-text="Arshbir in Royal Canadian Air Cadets uniform with medals, holding an award"></div>
+            <h3>Air Cadets</h3>
+            <dl>
+              <div><dt>Rank</dt><dd>Warrant Officer Second Class</dd></div>
+              <div><dt>When</dt><dd>~6 years, Calgary</dd></div>
+              <div><dt>Did</dt><dd>Senior leadership for a squadron of 150+ cadets. Ground school, navigation, familiarization flying.</dd></div>
+            </dl>
+          </article>
+
+          <div class="rail__note"><p>Also part-time at Walmart Online Grocery Pickup since Jan 2026, alongside all of the above.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · SPEC SHEET: dense, honest, flow -->
+  <section id="spec" class="spec" data-alt="40000">
+    <div class="sc-wrap spec__grid">
+      <div class="spec__intro" data-sc-in>
+        <h2>Spec sheet.</h2>
+        <p>Only what I've used on real projects. No percentage bars.</p>
+      </div>
+      <table class="sheet" data-sc-in>
+        <tbody>
+          <tr><th scope="row">Mechanical</th><td><b>Siemens NX</b><span class="sep">·</span>3D CAD<span class="sep">·</span><b>Enclosure design</b><span class="sep">·</span><b>Electronics packaging</b><span class="sep">·</span>Structural integration<span class="sep">·</span>Prototyping<span class="sep">·</span>Design for assembly<span class="sep">·</span>Blender</td></tr>
+          <tr><th scope="row">Aerospace &amp; avionics</th><td><b>Rocket avionics integration</b><span class="sep">·</span><b>TeleMega, MIDAS flight computers</b><span class="sep">·</span><b>Telemetry ground stations</b><span class="sep">·</span>RF integration<span class="sep">·</span>GPS &amp; barometric sensors<span class="sep">·</span>Launch prep<span class="sep">·</span>Hardware troubleshooting</td></tr>
+          <tr><th scope="row">Electrical</th><td><b>Wire harnessing</b><span class="sep">·</span>Cable routing<span class="sep">·</span><b>Power distribution</b><span class="sep">·</span>LiPo integration<span class="sep">·</span>Connectors<span class="sep">·</span><b>Continuity testing</b><span class="sep">·</span>Bench testing<span class="sep">·</span>Thermal management</td></tr>
+          <tr><th scope="row">Software</th><td>Java<span class="sep">·</span>JavaScript<span class="sep">·</span>TypeScript<span class="sep">·</span>Python<span class="sep">·</span><b>React Native / Expo</b><span class="sep">·</span><b>Node.js / Express</b><span class="sep">·</span><b>PostgreSQL</b><span class="sep">·</span>Supabase<span class="sep">·</span>REST APIs<span class="sep">·</span>Git</td></tr>
+          <tr><th scope="row">Integrations</th><td><b>Stripe Connect</b><span class="sep">·</span><b>Mapbox</b><span class="sep">·</span><b>Twilio</b><span class="sep">·</span>Postman<span class="sep">·</span>ngrok<span class="sep">·</span>Google Cloud</td></tr>
+          <tr><th scope="row">Coursework</th><td>Statics<span class="sep">·</span>Physics: Mechanics, E&amp;M<span class="sep">·</span>Calculus III<span class="sep">·</span>Differential Equations<span class="sep">·</span>Java<span class="sep">·</span>Aerospace Design<span class="sep">·</span>CAD with Siemens NX</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 8 · KÁRMÁN LINE: the close resolves at the top of the climb -->
+  <section id="karman" data-sc-act="pin" data-sc-span="1.3" data-alt="100000">
+    <div data-sc-stage>
+      <div class="close">
+        <div class="karman" aria-hidden="true"><span class="tag"><b>100 km</b> · Kármán line · where Spaceshot is headed</span></div>
+        <h2 data-sc-cue="0.04" data-sc-kinetic="lines">Let's build something that flies.</h2>
+        <p class="close__lede" data-sc-cue="0.06">I'm looking for internships in vehicle integration and test, avionics, mechanical design, ground support equipment and spacecraft hardware. US and Canadian citizen.</p>
+        <div class="close__row" data-sc-cue="0.08">
+          <a class="btn btn--solid" href="mailto:arshbirbhamra@gmail.com" data-sc-magnet="0.26" data-sc-rise="0">Email me</a>
+          <div class="close__links">
+            <a href="https://www.linkedin.com/in/arshbir-bhamra-6717b2273/" target="_blank" rel="noopener">LinkedIn</a>
+            <!-- GITHUB: replace with <a href="https://github.com/HANDLE" target="_blank" rel="noopener">GitHub</a> -->
+            <span class="todo">GitHub link needed</span>
+          </div>
+        </div>
+        <footer class="foot">
+          <span>© <span data-year>2026</span> Arshbir Bhamra</span>
+          <span>arshbirbhamra@gmail.com</span>
+          <span>Aerospace Engineering · University of Illinois Urbana-Champaign</span>
+        </footer>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="assets/sc/scrollcraft.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* Media slots: load the file if it exists, else show a labelled placeholder.
+     The img is attached first: detached lazy images never fire load/error. */
+  document.querySelectorAll(".slot[data-src]").forEach(function (el) {
+    var img = new Image();
+    img.alt = el.dataset.altText || el.dataset.label || "";
+    img.decoding = "async";
+    img.onerror = function () {
+      /* Visitors never see a placeholder. The peak drops its media and lets the
+         altitude stand on the sky; rail objects drop the empty frame. The
+         labelled placeholder shows only on localhost, as a to-do for the owner. */
+      var peak = el.closest("#luna");
+      if (peak) peak.classList.add("no-media");
+      if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || el.closest(".obj")) {
+        if (!peak) el.remove();
+        return;
+      }
+      el.classList.add("is-empty");
+      el.innerHTML = '<div class="ph"><b>Photo needed</b><span>' + el.dataset.label +
+        '</span><i>' + el.dataset.src.split("/").pop() + "</i></div>";
+    };
+    img.src = el.dataset.src;
+    el.appendChild(img);
+  });
+
+  ScrollCraft.mount(document.body);
+
+  /* Stars: drawn once, deterministic. */
+  var cv = document.querySelector(".sky__stars");
+  function drawStars() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = cv.clientWidth, h = cv.clientHeight;
+    cv.width = w * dpr; cv.height = h * dpr;
+    var c = cv.getContext("2d"); c.scale(dpr, dpr);
+    var s = 7; function r() { s = (s * 16807) % 2147483647; return s / 2147483647; }
+    var n = Math.round(w * h / 2600);
+    for (var i = 0; i < n; i++) {
+      var y = r() * h, x = r() * w, big = r() > 0.97;
+      c.globalAlpha = (0.25 + r() * 0.75) * (0.35 + 0.65 * (1 - y / h * 0.6));
+      c.fillStyle = r() > 0.85 ? "#cfe6ff" : "#ffffff";
+      c.beginPath(); c.arc(x, y, big ? 1.3 : 0.6 + r() * 0.5, 0, 6.283); c.fill();
+    }
+  }
+  drawStars();
+
+  /* Altimeter: section tops are anchored to altitudes; between anchors the
+     reading interpolates on a log scale, so it reads like a real climb. */
+  var TOP = 100000;
+  function f(a) { return Math.log10(1 + a / 10) / Math.log10(1 + TOP / 10); }
+  function inv(x) { return 10 * (Math.pow(10, x * Math.log10(1 + TOP / 10)) - 1); }
+  var secs = [].slice.call(document.querySelectorAll("[data-alt]"));
+  var reads = document.querySelectorAll("[data-alt-read]");
+  var items = [].slice.call(document.querySelectorAll(".alt li"));
+  var allLis = [].slice.call(document.querySelectorAll(".alt li, .wp-sheet li"));
+  var wps = items.map(function (li) { return li.dataset.wp; });
+
+  /* Waypoint sheet toggle (tablet and phone). */
+  var trig = document.querySelector(".bar__alt"), sheet = document.getElementById("wp-sheet");
+  function setSheet(open) {
+    sheet.hidden = !open;
+    trig.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) { var c = sheet.querySelector(".is-cur a") || sheet.querySelector("a"); c.focus({ preventScroll: true }); }
+  }
+  trig.addEventListener("click", function (e) { e.stopPropagation(); setSheet(sheet.hidden); });
+  sheet.addEventListener("click", function (e) { if (e.target.closest("a")) setSheet(false); });
+  document.addEventListener("click", function (e) { if (!sheet.hidden && !sheet.contains(e.target)) setSheet(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !sheet.hidden) { setSheet(false); trig.focus(); } });
+  var anchors = [];
+  function measure() {
+    var max = document.documentElement.scrollHeight - innerHeight;
+    anchors = secs.map(function (s, i) {
+      var y = s.getBoundingClientRect().top + scrollY;
+      if (i === secs.length - 1) y = Math.min(y, max);
+      return { y: Math.max(0, y), f: f(+s.dataset.alt), id: s.id };
+    });
+    anchors[anchors.length - 1].y = Math.max(anchors[anchors.length - 1].y, max);
+    items.forEach(function (li) {
+      var s = document.getElementById(li.dataset.wp);
+      li.style.bottom = (f(+s.dataset.alt) * 100) + "%";
+    });
+  }
+  function fmt(a) {
+    if (a < 1000) return Math.round(a / 10) * 10 + " m";
+    return (a < 10000 ? a / 1000 : Math.round(a / 1000)).toLocaleString(undefined, { maximumFractionDigits: 1 }) + " km";
+  }
+  var last = -1;
+  function tick() {
+    var y = scrollY, x = 0;
+    for (var i = 0; i < anchors.length - 1; i++) {
+      var A = anchors[i], B = anchors[i + 1];
+      if (y >= A.y && y <= B.y) { x = A.f + (B.f - A.f) * ((y - A.y) / Math.max(1, B.y - A.y)); break; }
+      if (y > B.y) x = B.f;
+    }
+    if (Math.abs(x - last) > 0.0005) {
+      last = x;
+      document.documentElement.style.setProperty("--f", x.toFixed(4));
+      var t = fmt(inv(x));
+      reads.forEach(function (r) { r.textContent = t; });
+      /* current = last waypoint passed; next = the one above it. Both stay
+         labelled on the rail so the nav is readable without hovering. */
+      var cur = 0;
+      wps.forEach(function (id, i) { if (x >= f(+document.getElementById(id).dataset.alt) - 0.002) cur = i; });
+      allLis.forEach(function (li) {
+        var i = wps.indexOf(li.dataset.wp);
+        li.classList.toggle("is-passed", i <= cur);
+        li.classList.toggle("is-cur", i === cur);
+        li.classList.toggle("is-next", i === cur + 1);
+      });
+    }
+    requestAnimationFrame(tick);
+  }
+  measure();
+  addEventListener("resize", function () { measure(); drawStars(); last = -1; });
+  addEventListener("load", function () { measure(); last = -1; });
+  requestAnimationFrame(tick);
+
+  /* Hardware loops play only while on screen, and never under reduced motion
+     (the poster frame carries the moment instead). */
+  var still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var loops = document.querySelectorAll("video.loop");
+  if (!still && "IntersectionObserver" in window) {
+    var lio = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (e.isIntersecting) { e.target.preload = "auto"; var p = e.target.play(); if (p && p.catch) p.catch(function () {}); }
+        else e.target.pause();
+      });
+    }, { threshold: 0.35 });
+    loops.forEach(function (v) { lio.observe(v); });
+  }
+
+  document.querySelectorAll("[data-year]").forEach(function (e) { e.textContent = new Date().getFullYear(); });
+})();
+</script>
+</body>
+</html>

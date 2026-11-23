@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ground Station 2.0 · Arshbir Bhamra</title>
+  <meta name="description" content="Case study: leading the redesign of the Illinois Space Society Spaceshot telemetry ground station.">
+  <meta name="theme-color" content="#07090c">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307090c'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='13' fill='%23f2f4f7' text-anchor='middle'%3EAB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="../index.html" class="brand">Arshbir <span>Bhamra</span></a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="ground-station.html" class="active">Ground Station</a></li>
+      <li><a href="sounding-rocket.html">Sounding Rocket</a></li>
+      <li><a href="hometern.html">HomeTern</a></li>
+      <li><a href="mailto:arshbirbhamra@gmail.com" class="nav-cta">Email me</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+<section class="cs-hero">
+  <div class="grid-lines"></div>
+  <div class="container">
+    <a href="../index.html#ground-station" class="back"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> All projects</a>
+    <div><span class="status-pill">Ongoing</span></div>
+    <h1>Ground Station 2.0</h1>
+    <p class="lede">Leading the redesign of a portable ground station that receives live telemetry from a two-stage sounding rocket: mechanical structure, RF hardware, computing, power and cooling integrated into one enclosure that has to work in a field.</p>
+
+    <div class="meta-bar">
+      <div><div class="k">Role</div><div class="v">Ground Station Lead</div></div>
+      <div><div class="k">Organization</div><div class="v">Illinois Space Society · Spaceshot</div></div>
+      <div><div class="k">Timeline</div><div class="v">Sep 2026 – Present</div></div>
+      <div><div class="k">Status</div><div class="v">In progress</div></div>
+    </div>
+
+    <div class="cs-cover">
+      <div class="media" data-src="../assets/img/ground-station/cover.jpg" data-label="The ground station in progress: a hard case with two monitors in the lid and a keyboard set into an acrylic panel"></div>
+    </div>
+  </div>
+</section>
+
+<div class="container cs-layout">
+  <nav aria-label="On this page">
+    <ul class="toc">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#problem">Engineering problem</a></li>
+      <li><a href="#role">My responsibilities</a></li>
+      <li><a href="#constraints">Design constraints</a></li>
+      <li><a href="#approach">Technical approach</a></li>
+      <li><a href="#cad">CAD &amp; photographs</a></li>
+      <li><a href="#integration">Manufacturing &amp; integration</a></li>
+      <li><a href="#testing">Testing</a></li>
+      <li><a href="#results">Status &amp; lessons</a></li>
+    </ul>
+  </nav>
+
+  <article class="cs-content">
+
+    <section class="cs-section" id="overview">
+      <h2>A field-ready link to the vehicle.</h2>
+      <p class="lead-p">The ground station is the team's only live window into the rocket during flight. It receives telemetry from both stages and has to be set up, powered and operated at a remote launch site.</p>
+      <p>The station combines a mechanical frame and enclosure, RF communication equipment, a computer and router, power distribution and thermal management. Version 2.0 is a ground-up rework of how all of those pieces are packaged, mounted, wired and accessed, aimed at reliability, maintainability and easier field use.</p>
+      <p>The program's longer-term goal is a vehicle capable of reaching the 100 km Kármán line, so the ground station needs to be a dependable piece of support equipment, not a one-off.</p>
+    </section>
+
+    <section class="cs-section" id="problem">
+      <h2>What needed to change.</h2>
+      <p>The original station worked, but it had grown component by component. Improving it meant addressing several system-level issues at once:</p>
+      <ul class="bullets">
+        <li><strong>Mounting.</strong> Electronics needed purpose-built internal supports rather than ad-hoc placement.</li>
+        <li><strong>Wiring.</strong> Cable routing and harnessing needed to be organized so faults can be traced and fixed quickly in the field.</li>
+        <li><strong>Access.</strong> Power hardware and connectors needed to be reachable without disassembling the station.</li>
+        <li><strong>Heat.</strong> A closed box full of electronics needs a planned airflow path.</li>
+        <li><strong>RF.</strong> Antennas need clearance from the structure and from each other.</li>
+        <li><strong>Rigidity.</strong> The structure has to survive transport and repeated setup.</li>
+      </ul>
+      <div class="split">
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/original-exterior.jpg" data-label="Original ground station: exterior"></div>
+          <figcaption>Original ground station (v1)</figcaption>
+        </figure>
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/original-interior.jpg" data-label="Original ground station: interior layout and wiring"></div>
+          <figcaption>v1 internal layout</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cs-section" id="role">
+      <h2>What I own vs. what the team does.</h2>
+      <p>This is a team effort. To be clear about my part:</p>
+      <div class="ownership">
+        <div class="card mine">
+          <div class="k mine">My role as lead</div>
+          <ul>
+            <li>Lead the student team and set the direction of the redesign</li>
+            <li>Oversee mechanical design, CAD, prototyping, assembly and bench testing</li>
+            <li>Develop internal mounting solutions for the electronics</li>
+            <li>Plan cable routing and wire harness management</li>
+            <li>Coordinate mechanical and electrical interfaces</li>
+            <li>Coordinate with the Avionics, Electrical Hardware, GNC and Software teams</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="k">Team &amp; partner sub-teams</div>
+          <ul>
+            <li>Ground station team members carry out CAD, fabrication and assembly tasks</li>
+            <li>Partner teams own the flight-side radios, avionics and ground software</li>
+            <li>Telemetry and operator-interface validation is a shared, cross-team effort</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="cs-section" id="constraints">
+      <h2>Fitting the hardware.</h2>
+      <p>The enclosure is driven by the components it has to carry. Approximate envelopes used for layout:</p>
+      <div class="spec-table-wrap">
+        <table class="spec-table">
+          <thead><tr><th>Component</th><th>Approx. envelope (in)</th><th>Layout consideration</th></tr></thead>
+          <tbody>
+            <tr><td>Power unit</td><td class="mono">8.5 × 6.35 × 1.75</td><td>Accessible switches and connectors</td></tr>
+            <tr><td>Computer</td><td class="mono">5 × 5 × 1.5</td><td>Airflow, port access</td></tr>
+            <tr><td>Router</td><td class="mono">10.25 × 5 × 1.25 <span style="color:var(--text-3)">+ ~2 antennas</span></td><td>Antenna clearance</td></tr>
+            <tr><td>Keyboard</td><td class="mono">15.75 × 5.375 × 1</td><td>Operator ergonomics</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-note">Dimensions are approximate and used for packaging studies.</p>
+
+      <div class="split-3">
+        <div class="card"><div class="k">Reliability</div><p>Secure mounting and strain relief so nothing shifts in transport.</p></div>
+        <div class="card"><div class="k">Maintainability</div><p>Components reachable and swappable without a full teardown.</p></div>
+        <div class="card"><div class="k">Field use</div><p>Fast setup at a launch site with clear, labeled interfaces.</p></div>
+      </div>
+      <p>The system also carries two independent radio/antenna channels (one for the booster, one for the sustainer), which drives RF packaging and antenna placement.</p>
+    </section>
+
+    <section class="cs-section" id="approach">
+      <h2>Designing around the interfaces.</h2>
+      <p>The redesign starts from the components and their connections, then builds the structure around them.</p>
+      <ul class="bullets">
+        <li><strong>Aluminum T-slot frame</strong> for a rigid, reconfigurable structure that can be adjusted as the layout evolves.</li>
+        <li><strong>Acrylic panels</strong> for enclosure walls with visibility into the internals.</li>
+        <li><strong>3D-printed mounts</strong> designed in Siemens NX to hold each component at a fixed location.</li>
+        <li><strong>Planned harness routing</strong> separating power and signal runs where practical.</li>
+        <li><strong>Ventilation and fans</strong> placed to move air across the computer and power hardware.</li>
+        <li><strong>Antenna placement</strong> chosen for clearance from the frame and other hardware.</li>
+      </ul>
+
+      <details class="expand">
+        <summary>Trade-offs under consideration</summary>
+        <div class="exp-body">
+          <ul class="bullets" style="margin:0">
+            <li><strong>Rigidity vs. mass.</strong> Stiffer structure helps survive transport but adds weight to carry into the field. A redesign direction being explored is using composite elements to reduce mass, with a target of 20%+ reduction.</li>
+            <li><strong>Enclosed vs. open.</strong> Fully enclosed panels protect hardware but trap heat; vents and fans trade some protection for cooling.</li>
+            <li><strong>Access vs. compactness.</strong> A tighter package is easier to carry, but leaves less room for hands and tools.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="expand">
+        <summary>Mechanical–electrical interface checklist</summary>
+        <div class="exp-body">
+          <ul class="bullets" style="margin:0">
+            <li>Mount points match component envelopes and connector locations</li>
+            <li>Cable bend radius and service loops accounted for in the layout</li>
+            <li>Power distribution reachable from outside or with one panel removed</li>
+            <li>Antenna feed lines routed with clearance from power runs</li>
+            <li>Airflow path from intake to exhaust is not blocked by harnesses</li>
+          </ul>
+        </div>
+      </details>
+    </section>
+
+    <section class="cs-section" id="cad">
+      <h2>The layout.</h2>
+      <figure>
+        <div class="media wide" data-src="../assets/img/ground-station/cad-assembly.jpg" data-label="Full enclosure assembly in Siemens NX" data-kind="CAD render needed"></div>
+        <figcaption>Ground Station 2.0: enclosure assembly (Siemens NX)</figcaption>
+      </figure>
+      <div class="split">
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/cad-internal.jpg" data-label="Internal electronics layout: section or exploded view" data-kind="CAD render needed"></div>
+          <figcaption>Internal electronics layout</figcaption>
+        </figure>
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/cad-mounts.jpg" data-label="3D-printed component mounts" data-kind="CAD render needed"></div>
+          <figcaption>Component mounts</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cs-section" id="integration">
+      <h2>Bringing the pieces together.</h2>
+      <p>Integration covers the power distribution equipment, computer, router and RF hardware, plus the harnesses that tie them together. Work in this phase includes fabricating mounts, assembling the frame, and routing and securing wiring.</p>
+      <div class="split">
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/wiring.jpg" data-label="Inside the case: router, power unit and mini PC in printed mounts between T-slot posts, with the cabling still loose"></div>
+          <figcaption>Work in progress: cabling and power distribution before harnessing</figcaption>
+        </figure>
+        <figure>
+          <div class="media" data-src="../assets/img/ground-station/assembly.jpg" data-label="Ground station assembly: printed mounts holding the router, mini PC and power unit, monitors in the lid"></div>
+          <figcaption>Work in progress: printed mounts locating each component on T-slot posts</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cs-section" id="testing">
+      <h2>Bench first, field second.</h2>
+      <p>Prototypes and sub-assemblies are checked on the bench (fit, wiring and power-up) before full integration. Telemetry electronics, operator interfaces and flight-data acquisition are validated together with the partner teams.</p>
+      <figure>
+        <div class="media" data-src="../assets/img/ground-station/bench-test.jpg" data-label="Bench testing of the ground station"></div>
+        <figcaption>Bench testing</figcaption>
+      </figure>
+      <div class="notice">[ PLACEHOLDER ] Add specific test results, issues found and fixes here once available. Nothing is claimed beyond what has been tested.</div>
+    </section>
+
+    <section class="cs-section" id="results">
+      <h2>Where it stands.</h2>
+      <p class="lead-p">The redesign is in progress. It has not yet been fully manufactured or flight-validated.</p>
+      <div class="callout">
+        <span class="k">What this project is teaching me</span>
+        <p>Packaging is a systems problem. Every mount, cable run and vent hole affects something else, and the interfaces between disciplines are where most of the real work is.</p>
+      </div>
+      <ul class="bullets">
+        <li>Systems integration across mechanical, electrical and RF hardware</li>
+        <li>Leading a team and coordinating with partner sub-teams</li>
+        <li>Design for manufacturing, assembly and field maintenance</li>
+        <li>Making and documenting engineering trade-offs</li>
+      </ul>
+    </section>
+
+  </article>
+</div>
+
+<div class="container">
+  <a href="sounding-rocket.html" class="next-project">
+    <span class="k">Next case study</span>
+    <h3>Two-Stage Sounding Rocket <span class="arrow"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></h3>
+  </a>
+</div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <span>© <span data-year>2026</span> Arshbir Bhamra</span>
+    <a href="../index.html"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> Back to portfolio</a>
+  </div>
+</footer>
+
+<script src="../assets/js/main.js"></script>
+</body>
+</html>

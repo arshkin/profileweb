@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Two-Stage Sounding Rocket · Arshbir Bhamra</title>
+  <meta name="description" content="Case study: avionics structures and electronics integration for the Illinois Space Society two-stage sounding rocket.">
+  <meta name="theme-color" content="#07090c">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307090c'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='13' fill='%23f2f4f7' text-anchor='middle'%3EAB%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a href="../index.html" class="brand">Arshbir <span>Bhamra</span></a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false"><span></span><span></span><span></span></button>
+    <ul class="nav-links">
+      <li><a href="ground-station.html">Ground Station</a></li>
+      <li><a href="sounding-rocket.html" class="active">Sounding Rocket</a></li>
+      <li><a href="hometern.html">HomeTern</a></li>
+      <li><a href="mailto:arshbirbhamra@gmail.com" class="nav-cta">Email me</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+<section class="cs-hero">
+  <div class="grid-lines"></div>
+  <div class="container">
+    <a href="../index.html#ground-station" class="back"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> All projects</a>
+    <div><span class="status-pill done">Completed role</span></div>
+    <h1>Two-Stage Sounding Rocket</h1>
+    <p class="lede">Avionics structures and electronics integration for a student-built two-stage rocket: mounting flight computers, packaging electronics, and turning hardware around between launch attempts.</p>
+
+    <div class="meta-bar">
+      <div><div class="k">Role</div><div class="v">Avionics Structures Engineer</div></div>
+      <div><div class="k">Organization</div><div class="v">Illinois Space Society · Spaceshot</div></div>
+      <div><div class="k">Timeline</div><div class="v">Sep 2025 – May 2026</div></div>
+      <div><div class="k">Team result</div><div class="v">Luna · ~13,000–14,000 ft apogee</div></div>
+    </div>
+
+    <div class="cs-cover">
+      <div class="media" data-src="../assets/img/rocket/cover.jpg" data-label="Luna booster and sustainer on the bench during avionics integration"></div>
+    </div>
+  </div>
+</section>
+
+<div class="container cs-layout">
+  <nav aria-label="On this page">
+    <ul class="toc">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#problem">Engineering problem</a></li>
+      <li><a href="#role">My contributions</a></li>
+      <li><a href="#constraints">Design constraints</a></li>
+      <li><a href="#approach">Technical approach</a></li>
+      <li><a href="#cad">Photographs</a></li>
+      <li><a href="#integration">Integration</a></li>
+      <li><a href="#testing">Testing &amp; turnaround</a></li>
+      <li><a href="#results">Results &amp; lessons</a></li>
+    </ul>
+  </nav>
+
+  <article class="cs-content">
+
+    <section class="cs-section" id="overview">
+      <h2>Electronics that have to survive a launch.</h2>
+      <p class="lead-p">The Spaceshot program designs and flies two-stage high-power sounding rockets. I worked on the avionics structures side: the hardware that holds flight electronics in place and connects them to the rest of the vehicle.</p>
+      <p>The avionics carry flight computers, GPS and barometric sensors, batteries, telemetry radios and the pyrotechnic deployment interfaces used for recovery. All of it has to fit in a tube, stay secure through boost and staging, and still be accessible for arming and inspection on the pad.</p>
+    </section>
+
+    <section class="cs-section" id="problem">
+      <h2>Tight volume, high loads, short deadlines.</h2>
+      <ul class="bullets">
+        <li><strong>Packaging.</strong> Fit multiple flight computers, batteries and radios into a constrained avionics bay.</li>
+        <li><strong>Mounting.</strong> Hold electronics securely against launch loads while keeping connectors reachable.</li>
+        <li><strong>Interfaces.</strong> Route power, signal and pyro connections cleanly between boards and bulkheads.</li>
+        <li><strong>Serviceability.</strong> Make the bay inspectable and repairable quickly when something goes wrong at the launch site.</li>
+      </ul>
+    </section>
+
+    <section class="cs-section" id="role">
+      <h2>Individual work vs. team accomplishment.</h2>
+      <div class="ownership">
+        <div class="card mine">
+          <div class="k mine">What I did</div>
+          <ul>
+            <li>Worked on structural integration of avionics hardware</li>
+            <li>Supported mechanical packaging of flight electronics</li>
+            <li>Worked with flight computers, telemetry hardware and supporting electronics</li>
+            <li>Helped solve mounting and electronics integration problems</li>
+            <li>Supported booster and sustainer avionics integration during Luna launch operations</li>
+            <li>Took part in rapid troubleshooting and rebuilding after flight testing</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="k">What the team achieved</div>
+          <ul>
+            <li>Designed, built and flew the two-stage vehicle</li>
+            <li>Luna reached an approximate apogee of 13,000–14,000 ft</li>
+            <li>Turned hardware around in roughly three days for another launch attempt</li>
+          </ul>
+        </div>
+      </div>
+      <p class="table-note">The altitude is a team result, not an individual one.</p>
+    </section>
+
+    <section class="cs-section" id="constraints">
+      <h2>The hardware in the bay.</h2>
+      <div class="stack-grid">
+        <div><div class="k">Flight computers</div><ul><li>TeleMega</li><li>MIDAS</li><li>MIDAS Mini</li></ul></div>
+        <div><div class="k">Sensing</div><ul><li>GPS</li><li>Barometric instrumentation</li></ul></div>
+        <div><div class="k">Power</div><ul><li>LiPo batteries</li><li>Electrical connectors</li></ul></div>
+        <div><div class="k">Recovery &amp; comms</div><ul><li>Pyrotechnic deployment interfaces</li><li>Telemetry radios</li></ul></div>
+      </div>
+      <div class="split-3">
+        <div class="card"><div class="k">Structural</div><p>Hold every board and battery firmly through boost, staging and recovery.</p></div>
+        <div class="card"><div class="k">Assembly</div><p>Electronics have to be installed, wired and armed in a set order inside a tube.</p></div>
+        <div class="card"><div class="k">Schedule</div><p>Launch windows don't move. Hardware has to be ready on the day.</p></div>
+      </div>
+    </section>
+
+    <section class="cs-section" id="approach">
+      <h2>Clear interfaces, inspectable hardware.</h2>
+      <ul class="bullets">
+        <li><strong>Defined mounting locations</strong> for each flight computer and battery inside the avionics enclosure.</li>
+        <li><strong>Organized connectors</strong> so power, sensor and pyro lines can be traced and checked.</li>
+        <li><strong>Accessible layout</strong> so arming, continuity checks and inspection can happen on the pad.</li>
+      </ul>
+      <details class="expand">
+        <summary>Why redundancy in flight computers matters</summary>
+        <div class="exp-body">
+          <p>Carrying more than one flight computer means a single board failure doesn't cost the recovery event or the flight data. The structural consequence is more hardware to mount, more wiring to route, and more connectors that have to stay seated through flight, which is exactly the packaging problem avionics structures has to solve.</p>
+        </div>
+      </details>
+    </section>
+
+    <section class="cs-section" id="cad">
+      <h2>Inside the avionics bay.</h2>
+      <div class="split">
+        <figure>
+          <div class="media tall" data-src="../assets/img/rocket/avionics-bay.jpg" data-label="Two Luna avionics sleds with flight computers, antennas and recovery hardware"></div>
+          <figcaption>Two avionics sleds, wired and labelled</figcaption>
+        </figure>
+        <figure>
+          <div class="media tall" data-src="../assets/media/sled-wiring.mp4" data-autoplay data-label="Connecting the wiring harness on an avionics sled"></div>
+          <figcaption>Connecting the sled harness</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cs-section" id="integration">
+      <h2>From bench to airframe.</h2>
+      <p>Integration means installing electronics on their mounts, wiring them to batteries, sensors and deployment hardware, and fitting the completed bay into the vehicle for both the booster and sustainer stages.</p>
+      <div class="split">
+        <figure>
+          <div class="media tall" data-src="../assets/media/sled-power.mp4" data-autoplay data-label="Powering up a MIDAS flight computer on its sled"></div>
+          <figcaption>Power-up check on a MIDAS flight computer</figcaption>
+        </figure>
+        <figure>
+          <div class="media tall" data-src="../assets/img/rocket/launch-prep.jpg" data-label="Team members wiring avionics at the launch field"></div>
+          <figcaption>Final integration at the launch field</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cs-section" id="testing">
+      <h2>A three-day turnaround.</h2>
+      <p class="lead-p">After a flight test, the team had roughly three days to troubleshoot, rebuild and prepare hardware for another launch attempt.</p>
+      <p>I took part in that effort: inspecting hardware, finding what needed fixing, and rebuilding avionics integration on a short deadline. It was the clearest lesson I've had in why hardware should be designed to be inspected and repaired quickly.</p>
+      <figure>
+        <div class="media" data-src="../assets/media/ejection-scrub.mp4" data-autoplay data-label="Ground test of the apogee ejection charge: the charge fires and the nose cone separates"></div>
+        <figcaption>Ground test of the apogee ejection charge</figcaption>
+      </figure>
+    </section>
+
+    <section class="cs-section" id="results">
+      <h2>What I took away.</h2>
+      <div class="split">
+        <figure>
+          <div class="media tall" data-src="../assets/media/launch-day.mp4" data-autoplay data-label="Luna launch day: the boost smoke trail rising from the pad, seen from the spectator line"></div>
+          <figcaption>Launch day. The boost trail still hanging over the pad.</figcaption>
+        </figure>
+        <figure>
+          <div class="media tall" data-src="../assets/img/rocket/launch.jpg" data-label="Arshbir at the launch field holding an avionics sled"></div>
+          <figcaption>At the launch field with an avionics sled. Luna reached ~13,000–14,000 ft (team result).</figcaption>
+        </figure>
+      </div>
+      <div>
+          <div class="callout" style="margin-top:0">
+            <span class="k">Lesson</span>
+            <p>Rocket development is a balance between structural reliability, electronic function, assembly constraints and launch deadlines.</p>
+          </div>
+          <ul class="bullets">
+            <li>Test early: problems found on the bench are cheap</li>
+            <li>Clear hardware interfaces make integration and debugging faster</li>
+            <li>Design for inspection and repair, because something will need fixing at the field</li>
+          </ul>
+      </div>
+    </section>
+
+  </article>
+</div>
+
+<div class="container">
+  <a href="hometern.html" class="next-project">
+    <span class="k">Next case study</span>
+    <h3>HomeTern <span class="arrow"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span></h3>
+  </a>
+</div>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <span>© <span data-year>2026</span> Arshbir Bhamra</span>
+    <a href="../index.html"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8H3M7 4L3 8l4 4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> Back to portfolio</a>
+  </div>
+</footer>
+
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
