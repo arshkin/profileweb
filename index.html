@@ -378,11 +378,32 @@
   .ht-phone { position: absolute; width: auto; height: 132%; border-radius: 22px; max-width: none;
     box-shadow: 0 30px 50px -18px rgba(0, 0, 0, 0.9), 0 6px 14px -6px rgba(0, 0, 0, 0.7);
     transition: transform 220ms var(--sc-ease-out), filter 220ms var(--sc-ease-out); }
+  .ht-shot { display: block; }
   .ht-phone--back { left: 9%; top: 15%; transform: rotate(-9deg); filter: brightness(0.72) saturate(0.9); }
-  .ht-phone--front { left: 47%; top: 9%; transform: rotate(7deg); }
+  .ht-front { position: absolute; left: 47%; top: 9%; height: 132%; aspect-ratio: 300 / 635; transform: rotate(7deg);
+    transition: transform 220ms var(--sc-ease-out); }
+  .ht-front { container-type: inline-size; }
+  .ht-front .ht-phone { position: absolute; inset: 0; height: 100%; width: 100%; }
+  /* A notification banner on the phone's own screen. */
+  .ht-notif { position: absolute; left: 7%; right: 7%; top: 7.5%; display: flex; align-items: center; gap: 4cqw;
+    padding: 4cqw 4.5cqw; border-radius: 7cqw; background: rgba(28, 34, 38, 0.92); border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.9); color: var(--sc-ink);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; transform: translateY(-14px) scale(0.96); transition: opacity 200ms var(--sc-ease-out), transform 260ms var(--sc-ease-out); }
+  .ht-notif__icon { flex: none; width: 11cqw; height: 11cqw; border-radius: 3cqw;
+    background: linear-gradient(150deg, #5be3a8, #2fae79); position: relative; }
+  .ht-notif__icon::after { content: ""; position: absolute; inset: 30% 24% 22%; border: 1.5px solid #062016; border-top: 0;
+    border-radius: 0 0 3px 3px; }
+  .ht-notif__txt { display: grid; line-height: 1.15; min-width: 0; }
+  .ht-notif__txt b { font-size: 5.6cqw; font-weight: 600; letter-spacing: 0.02em; color: var(--sc-ink-soft); }
+  .ht-notif__txt span { font-size: 7.4cqw; font-weight: 600; white-space: nowrap; }
+  .ht-notif .ic { margin-left: auto; flex: none; width: 7cqw; height: 7cqw; color: #5be3a8; }
+  .ht-shot:hover .ht-notif, .ht-shot:focus-visible .ht-notif { opacity: 1; transform: none; }
+  .ht-shot:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
+  @media (hover: none) { .ht-notif { opacity: 1; transform: none; } }
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-    .obj:hover .ht-phone--front { transform: rotate(5deg) translateY(-10px); }
-    .obj:hover .ht-phone--back { transform: rotate(-7deg) translateY(-4px); filter: brightness(0.85) saturate(0.95); }
+    .ht-shot:hover .ht-front { transform: rotate(5deg) translateY(-10px); }
+    .ht-shot:hover .ht-phone--back { transform: rotate(-7deg) translateY(-4px); filter: brightness(0.85) saturate(0.95); }
   }
   .rail:has(.obj .slot) .obj:not(:has(.slot, .ht-shot))::before { content: ""; display: block; aspect-ratio: 4 / 3;
     border-top: 1px solid var(--line); }
@@ -766,10 +787,18 @@
           </div>
 
           <article class="obj" style="--i:1">
-            <div class="ht-shot" role="img" aria-label="HomeTern app screens: a live trip map from Urbana to Chicago and a ride listing from UIUC to Naperville">
+            <!-- The phone is the link: a notification for hometern.com drops in on its screen. -->
+            <a class="ht-shot" href="https://www.hometern.com/" target="_blank" rel="noopener" aria-label="Visit hometern.com (opens in a new tab)">
               <img class="ht-phone ht-phone--back" src="assets/img/home/ht-choose.jpg" width="300" height="635" alt="" loading="lazy">
-              <img class="ht-phone ht-phone--front" src="assets/img/home/ht-track.jpg" width="300" height="635" alt="" loading="lazy">
-            </div>
+              <span class="ht-front">
+                <img class="ht-phone" src="assets/img/home/ht-track.jpg" width="300" height="635" alt="" loading="lazy">
+                <span class="ht-notif" aria-hidden="true">
+                  <span class="ht-notif__icon"></span>
+                  <span class="ht-notif__txt"><b>HomeTern</b><span>hometern.com</span></span>
+                  <svg class="ic" viewBox="0 0 16 16"><path d="M5 11L11 5M6 5h5v5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+                </span>
+              </span>
+            </a>
             <h3>HomeTern</h3>
             <dl>
               <div><dt>Role</dt><dd>Founder</dd></div>
