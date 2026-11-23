@@ -369,7 +369,22 @@
   .obj { display: flex; flex-direction: column; gap: var(--sc-4); }
   /* Objects without a photo keep the image band as quiet space, so every
      label schema starts on the same line across the rail. */
-  .rail:has(.obj .slot) .obj:not(:has(.slot))::before { content: ""; display: block; aspect-ratio: 4 / 3;
+  /* HomeTern: a product shot, two real screens angled on the app's own green. */
+  .ht-shot { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 10px; border: 1px solid var(--line);
+    background:
+      radial-gradient(65% 75% at 62% 78%, rgba(74, 222, 160, 0.26), transparent 70%),
+      radial-gradient(50% 60% at 20% 20%, rgba(124, 196, 255, 0.10), transparent 70%),
+      linear-gradient(160deg, #0e1a18 0%, #070b0e 100%); }
+  .ht-phone { position: absolute; width: auto; height: 132%; border-radius: 22px; max-width: none;
+    box-shadow: 0 30px 50px -18px rgba(0, 0, 0, 0.9), 0 6px 14px -6px rgba(0, 0, 0, 0.7);
+    transition: transform 220ms var(--sc-ease-out), filter 220ms var(--sc-ease-out); }
+  .ht-phone--back { left: 9%; top: 15%; transform: rotate(-9deg); filter: brightness(0.72) saturate(0.9); }
+  .ht-phone--front { left: 47%; top: 9%; transform: rotate(7deg); }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .obj:hover .ht-phone--front { transform: rotate(5deg) translateY(-10px); }
+    .obj:hover .ht-phone--back { transform: rotate(-7deg) translateY(-4px); filter: brightness(0.85) saturate(0.95); }
+  }
+  .rail:has(.obj .slot) .obj:not(:has(.slot, .ht-shot))::before { content: ""; display: block; aspect-ratio: 4 / 3;
     border-top: 1px solid var(--line); }
   .obj .slot { aspect-ratio: 4 / 3; }
   .obj .slot img { object-position: 50% 28%; }
@@ -751,7 +766,10 @@
           </div>
 
           <article class="obj" style="--i:1">
-            <div class="slot" data-src="assets/img/home/hometern.jpg" data-label="HomeTern app screens"></div>
+            <div class="ht-shot" role="img" aria-label="HomeTern app screens: a live trip map from Urbana to Chicago and a ride listing from UIUC to Naperville">
+              <img class="ht-phone ht-phone--back" src="assets/img/home/ht-choose.jpg" width="300" height="635" alt="" loading="lazy">
+              <img class="ht-phone ht-phone--front" src="assets/img/home/ht-track.jpg" width="300" height="635" alt="" loading="lazy">
+            </div>
             <h3>HomeTern</h3>
             <dl>
               <div><dt>Role</dt><dd>Founder</dd></div>
