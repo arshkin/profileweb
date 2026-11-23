@@ -134,19 +134,81 @@
     background-size: 64px 64px; transform: perspective(460px) rotateX(66deg); transform-origin: 50% 100%;
     -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 92%);
             mask-image: linear-gradient(to top, #000 10%, transparent 92%); }
-  .pad__horizon { position: absolute; left: 0; right: 0; top: 49%; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(124, 196, 255, 0.5), transparent); }
+  .pl { position: absolute; inset: 0; }
+  .dp { position: absolute; inset: 0; }
+  .pad__air { position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 26% at 50% 49%, rgba(124, 196, 255, 0.16), transparent 70%),
+      radial-gradient(90% 40% at 50% 52%, rgba(70, 120, 200, 0.12), transparent 75%); }
+  .pad__horizon { position: absolute; left: 0; right: 0; top: 49%; height: 1px; transform-origin: 50% 50%;
+    background: linear-gradient(90deg, transparent 2%, rgba(124, 196, 255, 0.35) 25%, #d6ecff 50%, rgba(124, 196, 255, 0.35) 75%, transparent 98%); }
+  .pad__horizon::after { content: ""; position: absolute; left: 10%; right: 10%; top: 1px; height: 140px;
+    background: radial-gradient(50% 100% at 50% 0%, rgba(124, 196, 255, 0.14), transparent 70%); }
+
+  /* Field photo: a viewfinder frame sitting behind the name. */
+  .pad__card { position: absolute; z-index: 1; margin: 0; right: clamp(16px, 9vw, 170px); top: clamp(5.5rem, 17vh, 10rem);
+    width: clamp(11rem, 19vw, 18.5rem); rotate: -3.5deg; display: flex; flex-direction: column-reverse; }
+  .pad__shot { position: relative; padding: 10px; background: rgba(13, 17, 24, 0.55);
+    border: 1px solid rgba(214, 236, 255, 0.14); border-radius: 10px;
+    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.95), 0 8px 24px -12px rgba(0, 0, 0, 0.8); }
+  .pad__shot img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 26%; border-radius: 4px;
+    filter: saturate(0.74) brightness(0.86) contrast(1.08); }
+  .vf { position: absolute; width: 16px; height: 16px; border: 0 solid var(--sc-accent); opacity: 0.9; }
+  .vf--tl { top: 18px; left: 18px; border-top-width: 1.5px; border-left-width: 1.5px; }
+  .vf--tr { top: 18px; right: 18px; border-top-width: 1.5px; border-right-width: 1.5px; }
+  .vf--bl { bottom: 18px; left: 18px; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+  .vf--br { bottom: 18px; right: 18px; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+  .pad__card figcaption { margin: 0 0 10px; text-align: right; font-family: var(--sc-font-mono); font-size: 0.68rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--sc-ink-soft); }
+
+  /* Mission elapsed time: real, counting from when the visitor arrived. */
+  .pad__met { position: absolute; z-index: 2; right: var(--sc-gutter); bottom: clamp(2.5rem, 9vh, 6.5rem); text-align: right;
+    display: grid; gap: 6px; font-family: var(--sc-font-mono); font-size: 0.74rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--sc-ink-soft); }
+  .pad__met b { color: var(--sc-accent); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  /* The name: two masked lines; BHAMRA ignites from outline to solid. On
+     scroll the lines drift apart as the climb starts. */
+  .name { font-family: var(--sc-font-display); font-weight: 800; font-stretch: 125%; text-transform: uppercase;
+    font-size: clamp(3.2rem, 11.4vw, 12rem); line-height: 0.86; letter-spacing: -0.025em; margin: 0 0 var(--sc-6); }
+  .name__l { display: block; overflow: hidden; padding: 0.02em 0 0.06em; margin-bottom: -0.04em; }
+  .name__l--a { transform: translateX(calc(var(--sc-p, 0) * -4vw)); }
+  .name__l--b { transform: translateX(calc(var(--sc-p, 0) * 4vw)); }
+  .name__in { display: inline-block; position: relative; }
+  .name__ghost { color: transparent; -webkit-text-stroke: 1.4px rgba(238, 242, 246, 0.85); }
+  .name__fill { position: absolute; left: 0; top: 0; color: var(--sc-ink); clip-path: inset(0 0 0 0); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pad__horizon { animation: sc-ignite 1.3s 0.15s var(--sc-ease-out) both; }
+    .pad__air { animation: sc-fade 1.6s 0.3s ease-out both; }
+    .pad__grid { animation: sc-grid 1.4s 0.35s var(--sc-ease-out) both; }
+    .name__in { animation: sc-rise 1s 0.45s var(--sc-ease-out) both; }
+    .name__l--b .name__in { animation-delay: 0.6s; }
+    .name__fill { animation: sc-fill 1s 1.15s cubic-bezier(0.65, 0, 0.35, 1) both; }
+    .pad__card { animation: sc-card 1.2s 0.9s var(--sc-ease-out) both; }
+    .pad__lede, .pad__row, .pad__tele, .pad__met { animation: sc-up 0.8s 1.35s var(--sc-ease-out) both; }
+    .dp--1 { translate: calc(var(--mx, 0) * -6px) calc(var(--my, 0) * -4px); }
+    .dp--2 { translate: calc(var(--mx, 0) * -14px) calc(var(--my, 0) * -6px); }
+    .dp--3 { translate: calc(var(--mx, 0) * 18px) calc(var(--my, 0) * 12px); }
+    .pad__copy { translate: calc(var(--mx, 0) * 6px) calc(var(--my, 0) * 3px); }
+    .sky__stars { translate: calc(var(--mx, 0) * -5px) calc(var(--my, 0) * -3px); }
+  }
+  @keyframes sc-ignite { from { transform: scaleX(0); opacity: 0; } 30% { opacity: 1; } to { transform: scaleX(1); opacity: 1; } }
+  @keyframes sc-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes sc-grid { from { opacity: 0; translate: 0 60px; } to { opacity: 1; translate: 0 0; } }
+  @keyframes sc-rise { from { transform: translateY(108%); } to { transform: none; } }
+  @keyframes sc-fill { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes sc-card { from { opacity: 0; transform: translateY(40px) rotate(-6deg) scale(0.96); } to { opacity: 1; transform: none; } }
+  @keyframes sc-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   .pad__haze { position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
     background: linear-gradient(to top, rgba(6, 8, 12, 0.92), rgba(6, 8, 12, 0)); }
   .pad__copy { position: absolute; z-index: 2; left: var(--sc-gutter); right: var(--sc-gutter);
     bottom: clamp(2.5rem, 9vh, 6.5rem); padding-left: clamp(0px, 9vw, 150px); }
-  .pad h1 { font-family: var(--sc-font-display); font-weight: 800; font-stretch: 122%; text-transform: uppercase;
-    font-size: clamp(3.1rem, 10.2vw, 10.5rem); line-height: 0.88; letter-spacing: -0.02em; margin: 0 0 var(--sc-6); }
   .pad__lede { font-size: clamp(1.1rem, 1.7vw, 1.45rem); line-height: 1.45; max-width: 36ch; color: var(--sc-ink);
     margin: 0 0 var(--sc-6); text-wrap: balance; }
   .pad__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-3); }
-  .pad__tele { position: absolute; z-index: 2; top: clamp(5.5rem, 15vh, 9rem); right: var(--sc-gutter);
-    text-align: right; display: grid; gap: 6px; }
+  .pad__tele { position: absolute; z-index: 2; top: clamp(5.5rem, 15vh, 9rem);
+    left: calc(var(--sc-gutter) + clamp(0px, 9vw, 150px)); display: grid; gap: 6px; }
   .pad__tele div { font-family: var(--sc-font-mono); font-size: 0.76rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); }
   .pad__tele div b { color: var(--sc-ink); font-weight: 500; }
   .pad__tele .live::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
@@ -383,7 +445,13 @@
     .bar__mark .short { display: inline; }
     .bar .btn { padding: 10px 14px; }
     .bar__links { gap: var(--sc-3); }
-    .pad__tele { display: none; }
+    .pad__tele, .pad__met { display: none; }
+    .pad__card { top: 84px; right: var(--sc-gutter); width: 42vw; }
+    .pad__shot { padding: 6px; }
+    .vf { width: 12px; height: 12px; }
+    .vf--tl, .vf--tr { top: 12px; } .vf--bl, .vf--br { bottom: 12px; }
+    .vf--tl, .vf--bl { left: 12px; } .vf--tr, .vf--br { right: 12px; }
+    .pad__card figcaption { font-size: 0.6rem; }
     .pad__copy, .peak__copy, .peak__label, .close { padding-left: 0; }
     .peak__label { left: var(--sc-gutter); }
     .close { padding-left: var(--sc-gutter); }
@@ -457,9 +525,23 @@
   <section id="pad" data-sc-act="pin" data-sc-span="1.45" data-alt="0">
     <div data-sc-stage>
       <div class="pad">
-        <div data-sc-parallax="-0.9" style="position:absolute;inset:0"><div class="pad__horizon"></div></div>
-        <div data-sc-parallax="-0.4" style="position:absolute;inset:0"><div class="pad__grid"></div></div>
-        <div data-sc-parallax="0.7" style="position:absolute;inset:0"><div class="pad__haze"></div></div>
+        <!-- Planes, back to front: atmosphere, horizon, launch-field grid, field
+             photo, name, haze. Scroll moves them at different rates; the pointer
+             shifts each by a different amount (inner .dp wrappers). -->
+        <div class="pl" data-sc-parallax="-1.1"><div class="dp dp--1"><div class="pad__air"></div><div class="pad__horizon"></div></div></div>
+        <div class="pl" data-sc-parallax="-0.4"><div class="dp dp--2"><div class="pad__grid"></div></div></div>
+        <div class="pl pl--card" data-sc-parallax="-0.7">
+          <div class="dp dp--3">
+            <figure class="pad__card">
+              <div class="pad__shot">
+                <img src="assets/img/home/arshbir-launch-field.jpg" width="1125" height="1500" alt="Arshbir at the launch field, holding an avionics sled">
+                <i class="vf vf--tl"></i><i class="vf vf--tr"></i><i class="vf vf--bl"></i><i class="vf vf--br"></i>
+              </div>
+              <figcaption>Launch field · sled in hand</figcaption>
+            </figure>
+          </div>
+        </div>
+        <div class="pl" data-sc-parallax="0.7"><div class="pad__haze"></div></div>
 
         <div class="pad__tele" data-sc-cue="0 0.7 0">
           <div class="live"><b>Ground Station Lead</b> · Illinois Space Society</div>
@@ -467,8 +549,16 @@
           <div>UIUC Aerospace · Class of <b>2029</b></div>
         </div>
 
+        <div class="pad__met" aria-hidden="true" data-sc-cue="0 0.7 0">
+          <div>MET <b data-met>00:00:00</b></div>
+          <div>Urbana, IL · 40.11° N 88.21° W</div>
+        </div>
+
         <div class="pad__copy" data-sc-cue="0 0.82 0">
-          <h1 data-sc-kinetic="lines">Arshbir <br>Bhamra</h1>
+          <h1 class="name" aria-label="Arshbir Bhamra">
+            <span class="name__l name__l--a" aria-hidden="true"><span class="name__in">Arshbir</span></span>
+            <span class="name__l name__l--b" aria-hidden="true"><span class="name__in"><span class="name__ghost">Bhamra</span><span class="name__fill">Bhamra</span></span></span>
+          </h1>
           <p class="pad__lede">I build, integrate and test flight hardware. Right now I lead the ground station that talks to our two-stage rocket.</p>
           <div class="pad__row">
             <a href="#ground-station" class="btn btn--solid">See the work</a>
@@ -861,6 +951,29 @@
   addEventListener("resize", function () { measure(); drawStars(); last = -1; });
   addEventListener("load", function () { measure(); last = -1; });
   requestAnimationFrame(tick);
+
+  /* Hero: mission elapsed time since the visitor arrived. */
+  var met = document.querySelector("[data-met]"), t0 = Date.now();
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  setInterval(function () {
+    var s = Math.floor((Date.now() - t0) / 1000);
+    met.textContent = pad2(Math.floor(s / 3600)) + ":" + pad2(Math.floor(s / 60) % 60) + ":" + pad2(s % 60);
+  }, 1000);
+
+  /* Hero depth: each plane follows the pointer by a different amount, eased
+     so it carries momentum. Fine pointers only, never under reduced motion. */
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    var root = document.documentElement, tx = 0, ty = 0, cx = 0, cy = 0, run = false;
+    addEventListener("pointermove", function (e) {
+      tx = (e.clientX / innerWidth) * 2 - 1; ty = (e.clientY / innerHeight) * 2 - 1;
+      if (!run) { run = true; requestAnimationFrame(step); }
+    }, { passive: true });
+    function step() {
+      cx += (tx - cx) * 0.07; cy += (ty - cy) * 0.07;
+      root.style.setProperty("--mx", cx.toFixed(4)); root.style.setProperty("--my", cy.toFixed(4));
+      if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) requestAnimationFrame(step); else run = false;
+    }
+  }
 
   /* Hardware loops play only while on screen, and never under reduced motion
      (the poster frame carries the moment instead). */
