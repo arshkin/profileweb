@@ -30,6 +30,5 @@ For a video, change the `data-src` to a `.mp4` file. Add `data-autoplay` to make
 Keep images under about 500 KB each. Export them as JPG at around 2000 px wide.
 
 ## Still needed
-- GitHub URL: search `GitHub URL needed` in `index.html`
 - Test results for the ground station: search `PLACEHOLDER` in `projects/ground-station.html`
 - HomeTern timeline or demo video: search `PLACEHOLDER` in `projects/hometern.html`
